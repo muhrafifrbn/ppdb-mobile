@@ -23,7 +23,7 @@ export default function AppButton({ title, onPress, loading }: Props) {
 const styles = StyleSheet.create({
   button: {
     width: "100%",
-    backgroundColor: "#dc2626",
+    backgroundColor: "#00B4D8",
     paddingVertical: 12,
     borderRadius: 8,
     alignItems: "center",
