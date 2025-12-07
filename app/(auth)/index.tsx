@@ -8,25 +8,39 @@ export default function AuthLanding() {
   const router = useRouter();
 
   return (
-    <View style={{ flex: 1, padding: 24, justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 16 }}>
-        Sistem PPDB SMK Letris 2
-      </Text>
-      <Text style={{ marginBottom: 32 }}>
-        Apakah kamu sudah pernah mendaftar sebelumnya?
-      </Text>
+    <View style={{ flex: 1 }}>
+      <View
+        style={{
+          backgroundColor: "#b91c1c",
+          height: 120,
+          borderBottomLeftRadius: 120,
+          borderBottomRightRadius: 120,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Text style={{ color: "#fff", fontWeight: "700" }}>
+          SISTEM PPDB SMK LETRIS 2
+        </Text>
+      </View>
 
-      <AppButton
-        title="Belum, saya mau daftar"
-        onPress={() => router.push("/(auth)/register")}
-      />
+      <View style={{ flex: 1, paddingHorizontal: 16, justifyContent: "center" }}>
+        <Text style={{ textAlign: "center", marginBottom: 24 }}>
+          Apakah kamu sudah pernah mendaftar sebelumnya?
+        </Text>
 
-      <View style={{ height: 12 }} />
+        <AppButton
+          title="Belum, saya mau daftar"
+          onPress={() => router.push("/(auth)/register")}
+        />
 
-      <AppButton
-        title="Sudah punya nomor pendaftaran"
-        onPress={() => router.push("/(auth)/login")}
-      />
+        <View style={{ height: 12 }} />
+
+        <AppButton
+          title="Sudah punya nomor pendaftaran"
+          onPress={() => router.push("/(auth)/login")}
+        />
+      </View>
     </View>
   );
 }

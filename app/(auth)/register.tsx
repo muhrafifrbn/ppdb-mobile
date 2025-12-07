@@ -110,172 +110,203 @@ export default function RegisterScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
     >
       <ScrollView
-        style={{ flex: 1, padding: 24 }}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 16 }}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+        overScrollMode="never"
       >
-        <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 16 }}>
-          Formulir Pendaftaran
-        </Text>
 
-        {/* JURUSAN DIPILIH (SELECT) */}
-        <Text>Jurusan Dipilih</Text>
         <View
           style={{
-            borderWidth: 1,
-            borderColor: "#d1d5db",
-            borderRadius: 8,
-            marginBottom: 12,
-            overflow: "hidden",
+            width: "100%",
+            borderRadius: 12,
             backgroundColor: "white",
+            padding: 12,
+            shadowColor: "#000",
+            shadowOpacity: 0.05,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 2,
           }}
         >
-          <Picker
-            selectedValue={form.jurusan}
-            onValueChange={(value) => handleChange("jurusan", String(value))}
+          <View style={{ marginHorizontal: -12, marginTop: -12, marginBottom: 12 }}>
+            <View
+              style={{
+                backgroundColor: "#b91c1c",
+                height: 110,
+                borderBottomLeftRadius: 110,
+                borderBottomRightRadius: 110,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
+                  FORMULIR PENDAFTARAN SMK LETRIS 2
+              </Text>
+            </View>
+          </View>
+
+          <Text>Jurusan Yang Di Pilih</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: "#d1d5db",
+              borderRadius: 8,
+              marginBottom: 12,
+              overflow: "hidden",
+              backgroundColor: "white",
+            }}
           >
-            <Picker.Item label="Pilih jurusan" value="" />
-            {JURUSAN_OPTIONS.map((j) => (
-              <Picker.Item key={j} label={j} value={j} />
-            ))}
-          </Picker>
-        </View>
+            <Picker
+              selectedValue={form.jurusan}
+              onValueChange={(value) => handleChange("jurusan", String(value))}
+            >
+              <Picker.Item label="Jurusan Yang Di Pilih" value="" />
+              {JURUSAN_OPTIONS.map((j) => (
+                <Picker.Item key={j} label={j} value={j} />
+              ))}
+            </Picker>
+          </View>
 
-        {/* NAMA LENGKAP */}
-        <Text>Nama Lengkap</Text>
-        <AppInput
-          value={form.nama_lengkap}
-          onChangeText={(t) => handleChange("nama_lengkap", t)}
-        />
-
-        {/* TEMPAT LAHIR */}
-        <Text>Tempat Lahir</Text>
-        <AppInput
-          value={form.tempat_lahir}
-          onChangeText={(t) => handleChange("tempat_lahir", t)}
-        />
-
-        {/* TANGGAL LAHIR (DATE PICKER) */}
-        <Text>Tanggal Lahir</Text>
-        <Pressable onPress={() => setShowDatePicker(true)}>
+          <Text>Nama Lengkap</Text>
           <AppInput
-            value={form.tanggal_lahir}
-            placeholder="YYYY-MM-DD"
-            editable={false}
-            pointerEvents="none"
-            style={{ backgroundColor: "#f3f4f6" }}
+            value={form.nama_lengkap}
+            onChangeText={(t) => handleChange("nama_lengkap", t)}
+            placeholder="Nama Lengkap"
           />
-        </Pressable>
 
-        {showDatePicker && (
-          <DateTimePicker
-            value={
-              form.tanggal_lahir ? new Date(form.tanggal_lahir) : new Date()
-            }
-            mode="date"
-            display={Platform.OS === "ios" ? "spinner" : "default"}
-            onChange={handleDateChange}
+          <Text>Alamat Anda</Text>
+          <AppInput
+            value={form.alamat}
+            onChangeText={(t) => handleChange("alamat", t)}
+            placeholder="Alamat Anda"
+            multiline
           />
-        )}
 
-        {/* JENIS KELAMIN (SELECT) */}
-        <Text>Jenis Kelamin</Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: "#d1d5db",
-            borderRadius: 8,
-            marginBottom: 12,
-            overflow: "hidden",
-            backgroundColor: "white",
-          }}
-        >
-          <Picker
-            selectedValue={form.jenis_kelamin}
-            onValueChange={(value) =>
-              handleChange("jenis_kelamin", String(value))
-            }
+          <View style={{ flexDirection: "row" }}>
+            <View style={{ flex: 1, marginRight: 8 }}>
+              <Text>Tempat Lahir</Text>
+              <AppInput
+                value={form.tempat_lahir}
+                onChangeText={(t) => handleChange("tempat_lahir", t)}
+                placeholder="Tempat Lahir"
+              />
+            </View>
+            <View style={{ flex: 1, marginLeft: 8 }}>
+              <Text>Tanggal Lahir</Text>
+              <Pressable onPress={() => setShowDatePicker(true)}>
+                <AppInput
+                  value={form.tanggal_lahir}
+                  placeholder="dd/mm/yy"
+                  editable={false}
+                  pointerEvents="none"
+                  style={{ backgroundColor: "#f3f4f6" }}
+                />
+              </Pressable>
+            </View>
+          </View>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={
+                form.tanggal_lahir ? new Date(form.tanggal_lahir) : new Date()
+              }
+              mode="date"
+              display={Platform.OS === "ios" ? "spinner" : "default"}
+              onChange={handleDateChange}
+            />
+          )}
+
+          <Text>Jenis Kelamin</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: "#d1d5db",
+              borderRadius: 8,
+              marginBottom: 12,
+              overflow: "hidden",
+              backgroundColor: "white",
+            }}
           >
-            <Picker.Item label="Pilih jenis kelamin" value="" />
-            {JENIS_KELAMIN_OPTIONS.map((j) => (
-              <Picker.Item key={j} label={j} value={j} />
-            ))}
-          </Picker>
-        </View>
+            <Picker
+              selectedValue={form.jenis_kelamin}
+              onValueChange={(value) =>
+                handleChange("jenis_kelamin", String(value))
+              }
+            >
+              <Picker.Item label="Jenis Kelamin" value="" />
+              {JENIS_KELAMIN_OPTIONS.map((j) => (
+                <Picker.Item key={j} label={j} value={j} />
+              ))}
+            </Picker>
+          </View>
 
-        {/* AGAMA (SELECT) */}
-        <Text>Agama</Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: "#d1d5db",
-            borderRadius: 8,
-            marginBottom: 12,
-            overflow: "hidden",
-            backgroundColor: "white",
-          }}
-        >
-          <Picker
-            selectedValue={form.agama}
-            onValueChange={(value) => handleChange("agama", String(value))}
+          <Text>Agama</Text>
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: "#d1d5db",
+              borderRadius: 8,
+              marginBottom: 12,
+              overflow: "hidden",
+              backgroundColor: "white",
+            }}
           >
-            <Picker.Item label="Pilih agama" value="" />
-            {AGAMA_OPTIONS.map((a) => (
-              <Picker.Item key={a} label={a} value={a} />
-            ))}
-          </Picker>
+            <Picker
+              selectedValue={form.agama}
+              onValueChange={(value) => handleChange("agama", String(value))}
+            >
+              <Picker.Item label="Agama" value="" />
+              {AGAMA_OPTIONS.map((a) => (
+                <Picker.Item key={a} label={a} value={a} />
+              ))}
+            </Picker>
+          </View>
+
+          <Text>Asal Sekolah</Text>
+          <AppInput
+            value={form.sekolah_asal}
+            onChangeText={(t) => handleChange("sekolah_asal", t)}
+            placeholder="Asal Sekolah"
+          />
+
+          <Text>No Telpon</Text>
+          <AppInput
+            value={form.telepon}
+            onChangeText={(t) => handleChange("telepon", t)}
+            placeholder="No Telpon"
+            keyboardType="phone-pad"
+          />
+
+          <Text>Email</Text>
+          <AppInput
+            value={form.email}
+            onChangeText={(t) => handleChange("email", t)}
+            placeholder="Email"
+            keyboardType="email-address"
+          />
+
+          <Text>Nama Ayah</Text>
+          <AppInput
+            value={form.nama_ayah}
+            onChangeText={(t) => handleChange("nama_ayah", t)}
+            placeholder="Nama Ayah"
+          />
+
+          <Text>Nama Ibu</Text>
+          <AppInput
+            value={form.nama_ibu}
+            onChangeText={(t) => handleChange("nama_ibu", t)}
+            placeholder="Nama Ibu"
+          />
+
+          <AppButton
+            title="Daftar Sekarang"
+            onPress={handleSubmit}
+            loading={loading}
+          />
         </View>
-
-        {/* SEKOLAH ASAL */}
-        <Text>Sekolah Asal</Text>
-        <AppInput
-          value={form.sekolah_asal}
-          onChangeText={(t) => handleChange("sekolah_asal", t)}
-        />
-
-        {/* ALAMAT (BOX BESAR) */}
-        <Text>Alamat Tempat Tinggal</Text>
-        <AppInput
-          value={form.alamat}
-          onChangeText={(t) => handleChange("alamat", t)}
-          multiline
-        />
-
-        {/* TELEPON */}
-        <Text>No Telepon / HP</Text>
-        <AppInput
-          value={form.telepon}
-          onChangeText={(t) => handleChange("telepon", t)}
-          keyboardType="phone-pad"
-        />
-
-        {/* EMAIL */}
-        <Text>Email</Text>
-        <AppInput
-          value={form.email}
-          onChangeText={(t) => handleChange("email", t)}
-          keyboardType="email-address"
-        />
-
-        {/* NAMA AYAH */}
-        <Text>Nama Ayah</Text>
-        <AppInput
-          value={form.nama_ayah}
-          onChangeText={(t) => handleChange("nama_ayah", t)}
-        />
-
-        {/* NAMA IBU */}
-        <Text>Nama Ibu</Text>
-        <AppInput
-          value={form.nama_ibu}
-          onChangeText={(t) => handleChange("nama_ibu", t)}
-        />
-
-        <AppButton
-          title="Daftar Sekarang"
-          onPress={handleSubmit}
-          loading={loading}
-        />
       </ScrollView>
     </KeyboardAvoidingView>
   );
