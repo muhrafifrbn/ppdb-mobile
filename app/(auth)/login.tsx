@@ -1,53 +1,95 @@
 // app/(auth)/login.tsx
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
+
 import AppButton from "../../components/ui/AppButton";
 import AppInput from "../../components/ui/AppInput";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginScreen() {
+  const router = useRouter();
   const { login } = useAuth();
-  const params = useLocalSearchParams<{ noPendaftaran?: string }>();
-  const [noPendaftaran, setNoPendaftaran] = useState("");
+  const { noPendaftaran } = useLocalSearchParams<{ noPendaftaran?: string }>();
+
+  const [nomorFormulir, setNomorFormulir] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Prefill dari register-success
   useEffect(() => {
-    if (params.noPendaftaran) {
-      setNoPendaftaran(String(params.noPendaftaran));
+    if (noPendaftaran && typeof noPendaftaran === "string") {
+      setNomorFormulir(noPendaftaran);
     }
-  }, [params.noPendaftaran]);
+  }, [noPendaftaran]);
 
-  const handleLogin = async () => {
-    if (!noPendaftaran) {
-      Alert.alert("Validasi", "Isi nomor pendaftaran terlebih dahulu.");
+  const handleSubmit = async () => {
+    if (!nomorFormulir.trim()) {
+      Alert.alert("Validasi", "Masukkan nomor formulir PPDB.");
       return;
     }
 
     try {
       setLoading(true);
-      await login(noPendaftaran.trim());
+      await login(nomorFormulir.trim());
+      // Redirect ditangani di (auth)/_layout.tsx
     } catch (e: any) {
-      Alert.alert("Login gagal", e.message ?? "Terjadi kesalahan.");
+      Alert.alert(
+        "Login Gagal",
+        e.message || "Nomor formulir tidak ditemukan."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <View style={{ flex: 1, padding: 24, justifyContent: "center" }}>
-      <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 16 }}>
-        Login PPDB
-      </Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
+    >
+      <ScrollView
+        style={{ flex: 1, padding: 24 }}
+        contentContainerStyle={{
+          paddingBottom: 40,
+          justifyContent: "center",
+          flexGrow: 1,
+        }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={{ marginBottom: 24 }}>
+          <Text style={{ fontSize: 24, fontWeight: "700", marginBottom: 8 }}>
+            Login PPDB
+          </Text>
+          <Text style={{ color: "#6b7280" }}>
+            Masukkan nomor formulir yang sudah diberikan saat pendaftaran.
+          </Text>
+        </View>
 
-      <Text>Nomor Pendaftaran</Text>
-      <AppInput
-        value={noPendaftaran}
-        onChangeText={setNoPendaftaran}
-        keyboardType="default"
-      />
+        <Text>Nomor Formulir PPDB</Text>
+        <AppInput
+          value={nomorFormulir}
+          onChangeText={setNomorFormulir}
+          autoCapitalize="characters"
+          placeholder="Contoh: PPDB202412070001"
+        />
 
-      <AppButton title="Masuk" onPress={handleLogin} loading={loading} />
-    </View>
+        <AppButton title="Masuk" onPress={handleSubmit} loading={loading} />
+
+        <View style={{ marginTop: 16 }}>
+          <Text style={{ fontSize: 12, color: "#6b7280" }}>
+            Jika belum memiliki nomor formulir, silakan lakukan pendaftaran
+            terlebih dahulu.
+          </Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

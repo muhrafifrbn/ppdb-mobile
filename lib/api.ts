@@ -3,78 +3,62 @@ import axios from "axios";
 import { router } from "expo-router";
 import * as SecureStore from "expo-secure-store";
 
-// ===========================================
-// 1. Base URL API
-// ===========================================
-// GANTI dengan IP laptop/server kamu
-// jangan pakai localhost!
-const BASE_URL = "http://192.168.1.10:3000/api";
+// ================================
+// BASE URL API
+// ================================
+// Saran: pakai ENV, tapi sementara bisa hardcode
+// GANTI IP sesuai laptop/server kamu
+const BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
 
-// ===========================================
-// 2. Axios instance
-// ===========================================
+// ================================
+// AXIOS INSTANCE
+// ================================
 const apiClient = axios.create({
   baseURL: BASE_URL,
   headers: {
     "Content-Type": "application/json",
   },
-  withCredentials: true,
+  withCredentials: true, // tidak digunakan di RN, tapi tidak masalah
 });
 
-// ===========================================
-// 3. REQUEST INTERCEPTOR
-//    Tambahkan token ke setiap request
-// ===========================================
+// ================================
+// REQUEST INTERCEPTOR
+// ================================
 apiClient.interceptors.request.use(
   async (config) => {
     const token = await SecureStore.getItemAsync("auth_token");
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// ===========================================
-// 4. RESPONSE INTERCEPTOR
-//    Auto refresh token ketika token expired
-// ===========================================
+// ================================
+// RESPONSE INTERCEPTOR
+// (jika nanti kamu pakai refresh token)
+// ================================
 apiClient.interceptors.response.use(
   (response) => response,
-
   async (error) => {
     const originalRequest = error.config;
 
-    // Error: Unauthorized & belum di-retry
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-
       try {
-        // Refresh token
         const refreshResponse = await apiClient.post("/auth/refresh-token");
         const newToken = refreshResponse.data.token;
 
         if (newToken) {
-          // Simpan token baru
           await SecureStore.setItemAsync("auth_token", newToken);
-
-          // Tambahkan Authorization header
           originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
-
-          // Ulangi request sebelumnya
           return apiClient(originalRequest);
         }
       } catch (refreshError) {
-        // Refresh gagal → Logout user
-        console.log("Refresh token gagal:", refreshError);
-
         await SecureStore.deleteItemAsync("auth_token");
-
         router.replace("/(auth)/login");
-
         return Promise.reject(refreshError);
       }
     }
@@ -83,11 +67,9 @@ apiClient.interceptors.response.use(
   }
 );
 
-// ===========================================
-// 5. API Wrapper (sama seperti project React JS kamu)
-// ===========================================
-
-// GET
+// ================================
+// WRAPPER GET / POST / PUT / DELETE
+// ================================
 export const get = async (endpoint: string, params = {}) => {
   try {
     const response = await apiClient.get(endpoint, { params });
@@ -98,7 +80,6 @@ export const get = async (endpoint: string, params = {}) => {
   }
 };
 
-// POST
 export const post = async (endpoint: string, data = {}) => {
   try {
     const response = await apiClient.post(endpoint, data);
@@ -109,7 +90,6 @@ export const post = async (endpoint: string, data = {}) => {
   }
 };
 
-// PUT
 export const put = async (endpoint: string, data = {}) => {
   try {
     const response = await apiClient.put(endpoint, data);
@@ -120,7 +100,6 @@ export const put = async (endpoint: string, data = {}) => {
   }
 };
 
-// DELETE
 export const del = async (endpoint: string) => {
   try {
     const response = await apiClient.delete(endpoint);
@@ -130,5 +109,94 @@ export const del = async (endpoint: string) => {
     throw error;
   }
 };
+
+// ================================
+// TIPE DATA SESUAI TABEL registration_form
+// ================================
+export interface RegistrationFormPayload {
+  jurusan_dipilih: string;
+  nama_lengkap: string;
+  tempat_lahir: string;
+  tanggal_lahir: string; // "YYYY-MM-DD"
+  jenis_kelamin: string;
+  agama: string;
+  sekolah_asal: string;
+  alamat: string;
+  telepon: string;
+  email: string;
+  nama_ayah: string;
+  nama_ibu: string;
+  id_gelombang: number;
+}
+
+export interface PPDBUser {
+  id: number;
+  nomor_formulir: string;
+  jurusan_dipilih: string;
+  nama_lengkap: string;
+  tempat_lahir: string;
+  tanggal_lahir: string;
+  jenis_kelamin: string;
+  agama: string;
+  sekolah_asal: string;
+  alamat: string;
+  telepon: string;
+  email: string;
+  nama_ayah: string;
+  nama_ibu: string;
+  id_gelombang: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+// ================================
+// REGISTER: POST /api/regist-form/mobile/create
+// ================================
+export async function registerPPDB(
+  payload: RegistrationFormPayload
+): Promise<{ id: number; nomor_formulir: string }> {
+  const res = await post("/regist-form/mobile/create", payload);
+  // Response dari backend:
+  // {
+  //   message: "...",
+  //   data: { id: 123, nomor_formulir: "PPDB2024...." }
+  // }
+
+  if (!res?.data?.nomor_formulir) {
+    throw new Error("Nomor formulir tidak ditemukan pada response API");
+  }
+
+  return {
+    id: res.data.id,
+    nomor_formulir: res.data.nomor_formulir,
+  };
+}
+
+// ================================
+// LOGIN: GET /api/regist-form/mobile/detail/:nomor_formulir
+// (verifyFormNumber akan detect nomor_formulir tsb)
+// ================================
+export async function loginPPDB(nomorFormulir: string): Promise<PPDBUser> {
+  console.log("LOGIN PPDB CALL", nomorFormulir);
+
+  try {
+    const res = await apiClient.get("/regist-form/mobile/detail/0", {
+      headers: {
+        "x-form-number": nomorFormulir,
+      },
+    });
+
+    console.log("LOGIN PPDB RESPONSE", res.data);
+
+    return res.data.data as PPDBUser;
+  } catch (error: any) {
+    console.log("LOGIN PPDB ERROR", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data,
+    });
+    throw error;
+  }
+}
 
 export default apiClient;

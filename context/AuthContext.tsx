@@ -7,29 +7,23 @@ import React, {
   useEffect,
   useState,
 } from "react";
-import { loginPPDB } from "../lib/api";
-
-type User = {
-  noPendaftaran: string;
-  nama: string;
-  jurusan?: string;
-};
+import { loginPPDB, PPDBUser } from "../lib/api";
 
 type AuthContextType = {
-  user: User | null;
+  user: PPDBUser | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (noPendaftaran: string) => Promise<void>;
+  login: (nomorFormulir: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<PPDBUser | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // load session dari SecureStore
+  // Load user dari SecureStore saat app pertama dibuka
   useEffect(() => {
     (async () => {
       try {
@@ -37,18 +31,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (saved) {
           setUser(JSON.parse(saved));
         }
+      } catch (err) {
+        console.log("Failed to load user:", err);
       } finally {
         setLoading(false);
       }
     })();
   }, []);
 
-  const login = async (noPendaftaran: string) => {
+  const login = async (nomorFormulir: string) => {
     setLoading(true);
     try {
-      const u = await loginPPDB(noPendaftaran);
-      setUser(u);
-      await SecureStore.setItemAsync("ppdb_user", JSON.stringify(u));
+      const userData = await loginPPDB(nomorFormulir);
+      setUser(userData);
+      await SecureStore.setItemAsync("ppdb_user", JSON.stringify(userData));
     } finally {
       setLoading(false);
     }
@@ -57,6 +53,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     setUser(null);
     await SecureStore.deleteItemAsync("ppdb_user");
+    await SecureStore.deleteItemAsync("auth_token"); // kalau nanti kamu pakai token
   };
 
   return (
@@ -76,6 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error("useAuth must be used inside AuthProvider");
+  if (!ctx) {
+    throw new Error("useAuth must be used inside AuthProvider");
+  }
   return ctx;
 }
