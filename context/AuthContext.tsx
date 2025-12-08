@@ -1,19 +1,13 @@
 // context/AuthContext.tsx
 import * as SecureStore from "expo-secure-store";
-import React, {
-  createContext,
-  ReactNode,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
 import { loginPPDB, PPDBUser } from "../lib/api";
 
 type AuthContextType = {
   user: PPDBUser | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (nomorFormulir: string) => Promise<void>;
+  login: (nomorFormulir: string, tanggal_lahir: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -39,12 +33,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const login = async (nomorFormulir: string) => {
+  const login = async (nomorFormulir: string, tanggal_lahir: string) => {
     setLoading(true);
     try {
-      const userData = await loginPPDB(nomorFormulir);
+      const userData = await loginPPDB(nomorFormulir, tanggal_lahir);
       setUser(userData);
-      await SecureStore.setItemAsync("ppdb_user", JSON.stringify(userData));
+      await SecureStore.setItemAsync("ppdb_user", JSON.stringify(userData.user));
     } finally {
       setLoading(false);
     }
