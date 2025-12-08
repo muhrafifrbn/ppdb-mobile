@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Text, View } from "react-native";
 import AppButton from "../../components/ui/AppButton";
+import { Image } from "react-native";
 
 export default function AuthLanding() {
   const router = useRouter();
@@ -13,15 +14,23 @@ export default function AuthLanding() {
         style={{
           backgroundColor: "#b91c1c",
           height: 120,
-          borderBottomLeftRadius: 120,
-          borderBottomRightRadius: 120,
+          borderBottomLeftRadius: 90,
+          borderBottomRightRadius: 90,
           alignItems: "center",
           justifyContent: "center",
         }}
+        
       >
-        <Text style={{ color: "#fff", fontWeight: "700" }}>
-          SISTEM PPDB SMK LETRIS 2
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={require("../../assets/images/logo-letris-removebg.png")}
+            style={{ width: 48, height: 48, marginRight: 10 }}
+            resizeMode="contain"
+          />
+          <Text style={{ color: "#fff", fontWeight: "700" }}>
+            SISTEM PPDB SMK LETRIS 2
+          </Text>
+        </View>
       </View>
 
       <View style={{ flex: 1, paddingHorizontal: 16, justifyContent: "center" }}>
