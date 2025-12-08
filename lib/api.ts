@@ -8,8 +8,9 @@ import * as SecureStore from "expo-secure-store";
 // ================================
 // Saran: pakai ENV, tapi sementara bisa hardcode
 // GANTI IP sesuai laptop/server kamu
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
-const BASE_URL_AUTH = "http://10.70.50.226:5500/api/auth-mobile/login";
+const BASE_URL =
+  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
+const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE
@@ -126,7 +127,6 @@ export interface RegistrationFormPayload {
   email: string;
   nama_ayah: string;
   nama_ibu: string;
-  id_gelombang: number;
 }
 
 export interface PPDBUser {
@@ -152,7 +152,9 @@ export interface PPDBUser {
 // ================================
 // REGISTER: POST /api/regist-form/mobile/create
 // ================================
-export async function registerPPDB(payload: RegistrationFormPayload): Promise<{ id: number; nomor_formulir: string }> {
+export async function registerPPDB(
+  payload: RegistrationFormPayload
+): Promise<{ id: number; nomor_formulir: string }> {
   const res = await post("/regist-form/mobile/create", payload);
   // Response dari backend:
   // {
@@ -174,7 +176,10 @@ export async function registerPPDB(payload: RegistrationFormPayload): Promise<{ 
 // LOGIN: GET /api/regist-form/mobile/detail/:nomor_formulir
 // (verifyFormNumber akan detect nomor_formulir tsb)
 // ================================
-export async function loginPPDB(nomor_formulir: string, tanggal_lahir: string): Promise<any> {
+export async function loginPPDB(
+  nomor_formulir: string,
+  tanggal_lahir: string
+): Promise<any> {
   console.log("LOGIN PPDB CALL", nomor_formulir);
 
   try {

@@ -39,8 +39,6 @@ const AGAMA_OPTIONS = [
   "LAINNYA",
 ];
 
-const DEFAULT_GELOMBANG_ID = 1; // sementara hardcode
-
 export default function RegisterScreen() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -105,7 +103,6 @@ export default function RegisterScreen() {
         email: form.email,
         nama_ayah: form.nama_ayah,
         nama_ibu: form.nama_ibu,
-        id_gelombang: DEFAULT_GELOMBANG_ID,
       };
 
       const result = await registerPPDB(payload);
