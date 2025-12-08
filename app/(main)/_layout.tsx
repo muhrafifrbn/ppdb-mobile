@@ -12,7 +12,7 @@ export default function MainLayout() {
   if (!isAuthenticated) return <Redirect href="/(auth)" />;
 
   return (
-    <Tabs screenOptions={{ headerTitleAlign: "center" }}>
+    <Tabs screenOptions={{ headerShown: false }}>
       <Tabs.Screen
         name="index"
         options={{
