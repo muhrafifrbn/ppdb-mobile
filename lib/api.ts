@@ -10,7 +10,7 @@ import * as SecureStore from "expo-secure-store";
 // GANTI IP sesuai laptop/server kamu
 const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
-const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
+const BASE_URL_AUTH = "http://192.168.100.9/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE
@@ -71,13 +71,14 @@ apiClient.interceptors.response.use(
 // ================================
 // WRAPPER GET / POST / PUT / DELETE
 // ================================
+
 export const get = async (endpoint: string, params = {}) => {
   try {
     const response = await apiClient.get(endpoint, { params });
+    console.log("Response dari API:", response); // Log response dari API
     return response.data;
   } catch (error) {
-    console.error("GET Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -86,8 +87,7 @@ export const post = async (endpoint: string, data = {}) => {
     const response = await apiClient.post(endpoint, data);
     return response.data;
   } catch (error) {
-    console.error("POST Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -96,8 +96,7 @@ export const put = async (endpoint: string, data = {}) => {
     const response = await apiClient.put(endpoint, data);
     return response.data;
   } catch (error) {
-    console.error("PUT Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -106,8 +105,7 @@ export const del = async (endpoint: string) => {
     const response = await apiClient.delete(endpoint);
     return response.data;
   } catch (error) {
-    console.error("DELETE Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -132,21 +130,6 @@ export interface RegistrationFormPayload {
 export interface PPDBUser {
   id: number;
   nomor_formulir: string;
-  jurusan_dipilih: string;
-  nama_lengkap: string;
-  tempat_lahir: string;
-  tanggal_lahir: string;
-  jenis_kelamin: string;
-  agama: string;
-  sekolah_asal: string;
-  alamat: string;
-  telepon: string;
-  email: string;
-  nama_ayah: string;
-  nama_ibu: string;
-  id_gelombang: number;
-  created_at?: string;
-  updated_at?: string;
 }
 
 // ================================
