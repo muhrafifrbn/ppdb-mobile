@@ -130,6 +130,7 @@ export interface RegistrationFormPayload {
 export interface PPDBUser {
   id: number;
   nomor_formulir: string;
+  id_gelombang: string;
 }
 
 // ================================
@@ -174,6 +175,10 @@ export async function loginPPDB(
     console.log("LOGIN PPDB RESPONSE", res.data);
 
     const data = res.data;
+
+    if (!data || !data.token) {
+      throw new Error("Login failed, no token received.");
+    }
 
     return {
       accessToken: data.token,

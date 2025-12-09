@@ -38,18 +38,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []); // Hanya dijalankan sekali saat aplikasi pertama kali dimuat
 
   const login = async (nomorFormulir: string, tanggal_lahir: string) => {
-    setLoading(true); // Menandakan loading saat login
+    setLoading(true); // Proses login sedang berlangsung
     try {
-      const userData = await loginPPDB(nomorFormulir, tanggal_lahir);
-      setUser(userData.user); // Simpan user data setelah login
-      console.log("Login sukses. Token:", userData.accessToken); // Debugging: Pastikan token diterima
-      console.log("User Data AuthContext:", user); // Debugging: Pastikan token diterima
-      // Simpan user dan token ke SecureStore
-      await SecureStore.setItemAsync(
-        "ppdb_user",
-        JSON.stringify(userData.user)
-      );
-      await SecureStore.setItemAsync("auth_token", userData.accessToken); // Menyimpan token
+      const userData = await loginPPDB(nomorFormulir, tanggal_lahir); // Mendapatkan data user setelah login
+      if (userData?.user) {
+        setUser(userData.user); // Menyimpan data user setelah login berhasil
+        console.log("Login berhasil. Data pengguna:", userData); // Debugging: Cek data pengguna yang berhasil login
+
+        // Simpan data user dan token ke SecureStore untuk penggunaan selanjutnya
+        await SecureStore.setItemAsync(
+          "ppdb_user",
+          JSON.stringify(userData.user)
+        );
+        await SecureStore.setItemAsync("auth_token", userData.accessToken);
+      } else {
+        throw new Error("Login failed, no user data.");
+      }
+    } catch (error) {
+      console.log("Login error:", error); // Debugging: Cek error jika ada masalah login
+      throw error; // Lempar error untuk ditangani di login.tsx
     } finally {
       setLoading(false); // Setelah login selesai, set loading ke false
     }

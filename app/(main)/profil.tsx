@@ -14,7 +14,7 @@ export default function Profil() {
       </Text>
 
       <Text>Nama: {user?.nama}</Text>
-      <Text>Nomor Pendaftaran: {user?.noPendaftaran}</Text>
+      <Text>Nomor Pendaftaran: {user?.nomor_formulir}</Text>
       <Text>Jurusan: {user?.jurusan ?? "-"}</Text>
 
       <View style={{ marginTop: 24 }}>

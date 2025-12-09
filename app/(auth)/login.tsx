@@ -49,7 +49,7 @@ export default function LoginScreen() {
     } catch (e: any) {
       Alert.alert(
         "Login Gagal",
-        e.message || "Nomor formulir atau tanggal lahir tidak ditemukan."
+        "Nomor formulir atau tanggal lahir tidak ditemukan."
       );
     } finally {
       setLoading(false);
