@@ -1,7 +1,7 @@
 import { get } from "@/lib/api"; // Menggunakan fungsi get dari api.ts
 import * as SecureStore from "expo-secure-store";
 import React, { useEffect, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, Image, Text, View } from "react-native";
 import { useAuth } from "../../context/AuthContext"; // Ambil context Auth untuk user
 
 export default function JadwalTes() {
@@ -64,34 +64,100 @@ export default function JadwalTes() {
         <Text>Error: {error}</Text>
       </View>
     );
-  }
+  } // Format tanggal
+  const formatTanggal = (tanggal: string) => {
+    const date = new Date(tanggal);
+    const options: Intl.DateTimeFormatOptions = {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return date.toLocaleDateString("id-ID", options); // Format Indonesia
+  };
 
   return (
-    <View style={{ flex: 1, padding: 24 }}>
-      <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 12 }}>
-        Jadwal Tes PPDB
-      </Text>
-
-      <Text>
-        • Tanggal Tes: {new Date(jadwalTes.tanggal_tes).toLocaleDateString()}
-      </Text>
-      <Text>• Jam Mulai: {jadwalTes.jam_mulai}</Text>
-      <Text>• Jam Selesai: {jadwalTes.jam_selesai}</Text>
-
-      <View style={{ marginTop: 16 }}>
-        <Text style={{ fontWeight: "700" }}>Informasi Ruangan:</Text>
-        <Text>
-          • Tes Kesehatan: {jadwalTes.informasi_ruangan.tes_kesehatan || "-"}
-        </Text>
-        <Text>• Wawancara: {jadwalTes.informasi_ruangan.wawancara || "-"}</Text>
-        <Text>• Psikotes: {jadwalTes.informasi_ruangan.psikotes || "-"}</Text>
-        <Text>
-          • Tes Komputer (TIK):{" "}
-          {jadwalTes.informasi_ruangan.tes_komputer || "-"}
-        </Text>
+    <View style={{ flex: 1 }}>
+      <View
+        style={{
+          backgroundColor: "#b91c1c",
+          height: 120,
+          borderBottomLeftRadius: 90,
+          borderBottomRightRadius: 90,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={require("../../assets/images/logo-letris-removebg.png")}
+            style={{ width: 48, height: 48, marginRight: 10 }}
+            resizeMode="contain"
+          />
+          <Text style={{ color: "#fff", fontWeight: "700" }}>
+            SISTEM PPDB SMK LETRIS 2
+          </Text>
+        </View>
       </View>
 
-      <Text>• Nama Gelombang: {jadwalTes.nama_gelombang}</Text>
+      <View style={{ flex: 1, padding: 16 }}>
+        <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 12 }}>
+          Jadwal Tes PPDB
+        </Text>
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderRadius: 12,
+            padding: 16,
+            shadowColor: "#000",
+            shadowOpacity: 0.08,
+            shadowRadius: 8,
+            shadowOffset: { width: 0, height: 2 },
+            elevation: 2,
+          }}
+        >
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontSize: 16, fontWeight: "600" }}>
+              Tes Kesehatan
+            </Text>
+            <Text style={{ color: "#6b7280" }}>
+              {formatTanggal(jadwalTes.tanggal_tes)} •{" "}
+              {jadwalTes.informasi_ruangan.tes_kesehatan || "-"}
+            </Text>
+          </View>
+          <View
+            style={{ height: 1, backgroundColor: "#e5e7eb", marginVertical: 8 }}
+          />
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontSize: 16, fontWeight: "600" }}>Wawancara</Text>
+            <Text style={{ color: "#6b7280" }}>
+              {formatTanggal(jadwalTes.tanggal_tes)} •{" "}
+              {jadwalTes.informasi_ruangan.wawancara || "-"}
+            </Text>
+          </View>
+          <View
+            style={{ height: 1, backgroundColor: "#e5e7eb", marginVertical: 8 }}
+          />
+          <View style={{ marginBottom: 12 }}>
+            <Text style={{ fontSize: 16, fontWeight: "600" }}>Psikotes</Text>
+            <Text style={{ color: "#6b7280" }}>
+              {formatTanggal(jadwalTes.tanggal_tes)} •{" "}
+              {jadwalTes.informasi_ruangan.psikotes || "-"}
+            </Text>
+          </View>
+          <View
+            style={{ height: 1, backgroundColor: "#e5e7eb", marginVertical: 8 }}
+          />
+          <View>
+            <Text style={{ fontSize: 16, fontWeight: "600" }}>
+              Tes Komputer (TIK)
+            </Text>
+            <Text style={{ color: "#6b7280" }}>
+              {formatTanggal(jadwalTes.tanggal_tes)} •{" "}
+              {jadwalTes.informasi_ruangan.tes_komputer || "-"}
+            </Text>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
