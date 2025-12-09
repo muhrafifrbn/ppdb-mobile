@@ -10,7 +10,7 @@ import * as SecureStore from "expo-secure-store";
 // GANTI IP sesuai laptop/server kamu
 const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
-const BASE_URL_AUTH = "http://192.168.100.9/api/auth-mobile/login";
+const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE

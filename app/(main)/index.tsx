@@ -102,7 +102,7 @@ export default function Dashboard() {
             Selamat datang,
           </Text>
           <Text style={{ fontSize: 18, marginBottom: 16 }}>
-            {registrationForm?.nama ?? "Calon Siswa"}
+            {registrationForm?.nama_lengkap ?? "Calon Siswa"}
           </Text>
 
           <View
@@ -111,12 +111,12 @@ export default function Dashboard() {
 
           <Text style={{ color: "#6b7280" }}>Nomor Pendaftaran</Text>
           <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 12 }}>
-            {registrationForm?.nomor_pendaftaran ?? "-"}
+            {registrationForm?.nomor_formulir ?? "-"}
           </Text>
 
           <Text style={{ color: "#6b7280" }}>Jurusan</Text>
           <Text style={{ fontSize: 16, fontWeight: "600" }}>
-            {registrationForm?.jurusan ?? "-"}
+            {registrationForm?.jurusan_dipilih ?? "-"}
           </Text>
         </View>
       </View>
