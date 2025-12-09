@@ -29,7 +29,7 @@ export default function Dashboard() {
 
         // Menggunakan axios untuk request GET
         const response = await get(
-          `http://192.168.100.9:5500/api/regist-form/mobile/detail/${user?.id}`
+          `/regist-form/mobile/detail/${user?.id}`
         );
 
         console.log("Data yang diterima:", response.data); // Log data yang diterima
@@ -98,8 +98,8 @@ export default function Dashboard() {
             elevation: 2,
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 8 }}>
-            Selamat datang,
+          <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 8}}>
+            Selamat datang
           </Text>
           <Text style={{ fontSize: 18, marginBottom: 16 }}>
             {registrationForm?.nama_lengkap ?? "Calon Siswa"}
