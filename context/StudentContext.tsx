@@ -1,7 +1,7 @@
 // context/StudentContext.tsx
 import * as SecureStore from "expo-secure-store";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { get } from "../lib/api";
+import { get, put } from "../lib/api";
 import { useAuth } from "./AuthContext";
 
 export type StudentForm = {
@@ -26,6 +26,7 @@ type StudentContextType = {
   student: StudentForm | null;
   loading: boolean;
   refreshStudent: () => Promise<void>;
+  updateStudent: (newData: Partial<StudentForm>) => Promise<void>;
 };
 
 const StudentContext = createContext<StudentContextType | undefined>(undefined);
@@ -35,6 +36,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [student, setStudent] = useState<StudentForm | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // 1. Fetch data formulir
   const fetchStudentData = async () => {
     // Cek apakah user sudah login dan punya nomor_formulir
     if (!user || !user.nomor_formulir) return;
@@ -61,6 +63,30 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // 2. Update data formulir
+  const updateStudent = async (newData: Partial<StudentForm>) => {
+    if (!student || !student.id) {
+      throw new Error("Data siswa tidak ditemukan, tidak bisa update.");
+    }
+
+    try {
+      const fullPayload = {
+        ...student,
+        ...newData,
+      };
+
+      console.log("Sending Update Payload:", fullPayload);
+
+      await put(`/regist-form/mobile/update/${student.id}`, fullPayload);
+
+      // Jika sukses, update state lokal agar UI berubah instan
+      setStudent(fullPayload);
+    } catch (error) {
+      console.error("Gagal update data di Context:", error);
+      throw error; // Lempar ke UI untuk menampilkan Alert
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchStudentData();
@@ -69,7 +95,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <StudentContext.Provider
-      value={{ student, loading, refreshStudent: fetchStudentData }}
+      value={{ student, loading, refreshStudent: fetchStudentData, updateStudent }}
     >
       {children}
     </StudentContext.Provider>

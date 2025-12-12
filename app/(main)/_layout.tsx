@@ -60,6 +60,12 @@ export default function MainLayout() {
             ),
           }}
         />
+        <Tabs.Screen
+          name="data-formulir"
+          options={{
+            href: null,
+          }}
+        />
       </Tabs>
     </StudentProvider>
   );
