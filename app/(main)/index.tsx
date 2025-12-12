@@ -1,68 +1,27 @@
-import Loading from "@/components/Loading"; // Komponen Loading yang sudah disiapkan
-import { get } from "@/lib/api";
-import * as SecureStore from "expo-secure-store";
-import React, { useEffect, useState } from "react";
-import { Alert, Image, Text, View } from "react-native";
-import { useAuth } from "../../context/AuthContext"; // Ambil context Auth untuk user
+// app/(main)/index.tsx
+import Loading from "@/components/Loading";
+import React from "react";
+import { Image, RefreshControl, ScrollView, Text, View } from "react-native";
+import { useStudentData } from "../../context/StudentContext"; // 1. Import Context
 
 export default function Dashboard() {
-  const { user, loading: userLoading } = useAuth(); // Mendapatkan user dan loading dari context
-  const [registrationForm, setRegistrationForm] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  // 2. Ambil data, loading status, dan fungsi refresh dari Context
+  const { student, loading, refreshStudent } = useStudentData();
 
-  // Pastikan kita hanya memulai fetchData jika user sudah ada dan loading user selesai
-  useEffect(() => {
-    if (userLoading || !user?.id) {
-      return; // Jangan lanjutkan fetchData jika user masih loading atau nomor_formulir belum ada
-    }
-
-    const fetchData = async () => {
-      try {
-        // Ambil token yang disimpan di SecureStore
-        const token = await SecureStore.getItemAsync("auth_token");
-        console.log("Token yang digunakan untuk request:", token); // Log token yang digunakan
-        console.log("User saved (main):", user); // Log token yang digunakan
-
-        if (!token) {
-          throw new Error("Token tidak ditemukan, harap login ulang.");
-        }
-
-        // Menggunakan axios untuk request GET
-        const response = await get(
-          `/regist-form/mobile/detail/${user?.id}`
-        );
-
-        console.log("Data yang diterima:", response.data); // Log data yang diterima
-
-        setRegistrationForm(response.data); // Simpan data ke state
-      } catch (error: any) {
-        console.error("Gagal mengambil data:", error);
-        setError(error.message || "Terjadi kesalahan dalam pengambilan data.");
-        Alert.alert(
-          "Error",
-          error.message || "Terjadi kesalahan dalam pengambilan data."
-        );
-      }
-    };
-
-    fetchData(); // Menjalankan fungsi fetchData
-  }, [user?.id, userLoading]); // Menjalankan ketika user.id atau loading berubah
-
-  // Menunggu loading atau data user yang belum ada
-  if (userLoading || !user) {
-    return <Loading />; // Jika masih loading, tampilkan loading screen
-  }
-
-  if (error) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Error: {error}</Text>
-      </View>
-    );
+  // Jika sedang loading awal dan data belum ada, tampilkan spinner
+  if (loading && !student) {
+    return <Loading />;
   }
 
   return (
-    <View style={{ flex: 1 }}>
+    // 3. Gunakan ScrollView agar bisa Pull-to-Refresh
+    <ScrollView
+      contentContainerStyle={{ flexGrow: 1 }}
+      refreshControl={
+        <RefreshControl refreshing={loading} onRefresh={refreshStudent} />
+      }
+    >
+      {/* HEADER */}
       <View
         style={{
           backgroundColor: "#b91c1c",
@@ -85,6 +44,7 @@ export default function Dashboard() {
         </View>
       </View>
 
+      {/* CONTENT */}
       <View style={{ flex: 1, padding: 16 }}>
         <View
           style={{
@@ -98,11 +58,13 @@ export default function Dashboard() {
             elevation: 2,
           }}
         >
-          <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 8}}>
+          <Text style={{ fontSize: 20, fontWeight: "700", marginBottom: 8 }}>
             Selamat datang
           </Text>
+
+          {/* 4. Tampilkan Data dari Context */}
           <Text style={{ fontSize: 18, marginBottom: 16 }}>
-            {registrationForm?.nama_lengkap ?? "Calon Siswa"}
+            {student?.nama_lengkap ?? "Calon Siswa"}
           </Text>
 
           <View
@@ -111,15 +73,15 @@ export default function Dashboard() {
 
           <Text style={{ color: "#6b7280" }}>Nomor Pendaftaran</Text>
           <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 12 }}>
-            {registrationForm?.nomor_formulir ?? "-"}
+            {student?.nomor_formulir ?? "-"}
           </Text>
 
           <Text style={{ color: "#6b7280" }}>Jurusan</Text>
           <Text style={{ fontSize: 16, fontWeight: "600" }}>
-            {registrationForm?.jurusan_dipilih ?? "-"}
+            {student?.jurusan_dipilih ?? "-"}
           </Text>
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }

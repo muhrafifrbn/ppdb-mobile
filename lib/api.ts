@@ -75,7 +75,7 @@ apiClient.interceptors.response.use(
 export const get = async (endpoint: string, params = {}) => {
   try {
     const response = await apiClient.get(endpoint, { params });
-    console.log("Response dari API:", response); // Log response dari API
+    // console.log("Response dari API:", response); // Log response dari API
     return response.data;
   } catch (error) {
     console.log("API Error:", error);
