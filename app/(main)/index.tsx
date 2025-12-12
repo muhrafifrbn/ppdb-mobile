@@ -5,6 +5,7 @@ import { Alert, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View 
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import AppButton from "../../components/ui/AppButton";
+import apiClient from "@/lib/api";
 import { useStudentData } from "../../context/StudentContext"; // 1. Import Context
 
 export default function Dashboard() {
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const [bank, setBank] = useState<string>("");
   const [buktiUri, setBuktiUri] = useState<string>("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const BANKS = [
     { value: "BCA", label: "BCA", norek: "1234567890 a.n. SMK Letris 2" },
     { value: "BRI", label: "BRI", norek: "0987654321 a.n. SMK Letris 2" },
@@ -36,15 +38,34 @@ export default function Dashboard() {
     if (!res.canceled) setBuktiUri(res.assets[0].uri);
   };
 
-  const handleSubmitPayment = () => {
+  const handleSubmitPayment = async () => {
     if (!bank || !buktiUri) {
       Alert.alert("Validasi", "Pilih bank dan unggah bukti pembayaran terlebih dahulu.");
       return;
     }
-    Alert.alert("Berhasil", "Bukti pembayaran terkirim.");
-    setShowPaymentModal(false);
-    setBank("");
-    setBuktiUri("");
+    try {
+      setUploading(true);
+      const amount = Number((student as any)?.nominal_pembayaran ?? (student as any)?.total_biaya ?? 0);
+      const idFormulir = (student as any)?.id ?? (student as any)?.id_formulir ?? "";
+      const today = new Date().toISOString().split("T")[0];
+      const name = buktiUri.split("/").pop() || `bukti-${Date.now()}.jpg`;
+      const form = new FormData();
+      form.append("nama_tagihan", "Biaya Pendaftaran");
+      form.append("nama_bank", bank);
+      form.append("tanggal_transfer", today);
+      form.append("jumlah_tagihan", String(amount));
+      form.append("id_formulir", String(idFormulir));
+      form.append("bukti_bayar", { uri: buktiUri, name, type: "image/jpeg" } as any);
+      await apiClient.post("/payment-form/mobile/create", form, { headers: { "Content-Type": "multipart/form-data" } });
+      Alert.alert("Berhasil", "Bukti pembayaran terkirim.");
+      setShowPaymentModal(false);
+      setBank("");
+      setBuktiUri("");
+    } catch (e: any) {
+      Alert.alert("Gagal", e?.message ?? "Upload bukti gagal.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   // Jika sedang loading awal dan data belum ada, tampilkan spinner
@@ -182,7 +203,7 @@ export default function Dashboard() {
 
               <View style={{ flexDirection: "row", marginTop: 16, gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <AppButton title="Kirim" onPress={handleSubmitPayment} />
+                  <AppButton title="Kirim" onPress={handleSubmitPayment} loading={uploading} />
                 </View>
                 <View style={{ flex: 1 }}>
                   <AppButton title="Tutup" onPress={() => setShowPaymentModal(false)} />
