@@ -9,8 +9,8 @@ import * as SecureStore from "expo-secure-store";
 // Saran: pakai ENV, tapi sementara bisa hardcode
 // GANTI IP sesuai laptop/server kamu
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.5:5500/api";
-const BASE_URL_AUTH = "http://192.168.1.5:5500/api/auth-mobile/login";
+  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
+const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE
@@ -67,6 +67,28 @@ apiClient.interceptors.response.use(
     return Promise.reject(error);
   }
 );
+
+export const postMultipart = async (endpoint: string, formData: FormData) => {
+  try {
+    const token = await SecureStore.getItemAsync("auth_token");
+
+    // Gunakan axios langsung agar bisa override headers content-type
+    const response = await axios.post(
+      `${process.env.EXPO_PUBLIC_API_URL}${endpoint}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Multipart API Error:", error);
+    throw error;
+  }
+};
 
 // ================================
 // WRAPPER GET / POST / PUT / DELETE

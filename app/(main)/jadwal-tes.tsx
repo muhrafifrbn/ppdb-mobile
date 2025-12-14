@@ -1,6 +1,6 @@
-import { get } from "@/lib/api";
-import { Ionicons } from "@expo/vector-icons"; // Import icon untuk tampilan kosong
-import * as SecureStore from "expo-secure-store";
+import apiClient, { get } from "@/lib/api"; // Import apiClient untuk handling error 404 manual
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -10,30 +10,72 @@ import {
   Text,
   View,
 } from "react-native";
-import { useAuth } from "../../context/AuthContext";
+import AppButton from "../../components/ui/AppButton"; // Pastikan path benar
+import { useStudentData } from "../../context/StudentContext"; // Pakai ini untuk ambil ID Siswa
 
 export default function JadwalTes() {
-  const { user } = useAuth();
+  const { student } = useStudentData(); // Ambil data siswa (ID & Gelombang)
+
+  // State untuk status pembayaran & Jadwal
+  const [paymentStatus, setPaymentStatus] = useState<
+    "loading" | "unpaid" | "pending" | "confirmed"
+  >("loading");
   const [jadwalTes, setJadwalTes] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
 
+  // Fungsi Utama: Cek Pembayaran dulu, baru Jadwal
   const fetchData = async () => {
+    // Pastikan data siswa ada
+    if (!student?.id) return;
+
     try {
-      const token = await SecureStore.getItemAsync("auth_token");
+      // 1. CEK STATUS PEMBAYARAN
+      // Kita gunakan apiClient langsung agar bisa catch error 404
+      try {
+        const payRes = await apiClient.get(
+          `/payment-form/mobile/detail/${student.id}`
+        );
+        const payData = payRes.data?.data || payRes.data;
 
-      if (!token) {
-        throw new Error("Token tidak ditemukan");
+        if (payData) {
+          if (payData.konfirmasi_pembayaran === 1) {
+            setPaymentStatus("confirmed");
+
+            // 2. JIKA CONFIRMED, BARU FETCH JADWAL TES
+            await fetchJadwalData();
+          } else {
+            setPaymentStatus("pending");
+          }
+        } else {
+          setPaymentStatus("unpaid");
+        }
+      } catch (payError: any) {
+        // Jika Error 404, artinya belum ada data pembayaran
+        if (payError.response && payError.response.status === 404) {
+          setPaymentStatus("unpaid");
+        } else {
+          console.error("Error cek pembayaran:", payError);
+          // Default ke unpaid jika error lain agar aman
+          setPaymentStatus("unpaid");
+        }
       }
+    } catch (error) {
+      console.error("General Error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
-      // Gunakan get dari api.ts
+  // Fungsi Fetch Jadwal (Dipanggil jika confirmed)
+  const fetchJadwalData = async () => {
+    try {
+      if (!student?.id_gelombang) return;
+
       const response = await get(
-        `/information/schedule-test/mobile/detail/${user?.id_gelombang}`
+        `/information/schedule-test/mobile/detail/${student.id_gelombang}`
       );
 
-      // Cek apakah response memiliki data yang valid
       if (response && response.data) {
-        // Coba parse informasi_ruangan (aman dari error jika string tidak valid)
         let infoRuangan = {};
         try {
           infoRuangan =
@@ -49,34 +91,26 @@ export default function JadwalTes() {
           informasi_ruangan: infoRuangan,
         });
       } else {
-        // Jika response sukses tapi data kosong
         setJadwalTes(null);
       }
-    } catch (error: any) {
-      console.error("Gagal mengambil jadwal:", error);
-      // Jika error (misal 404), kita pastikan jadwalTes null agar UI menampilkan "Belum ditentukan"
+    } catch (error) {
+      console.error("Gagal ambil jadwal:", error);
       setJadwalTes(null);
-    } finally {
-      setIsLoading(false);
-      setRefreshing(false);
     }
   };
 
   useEffect(() => {
-    if (user?.id_gelombang) {
+    if (student) {
       fetchData();
-    } else {
-      // Jika user belum punya gelombang, stop loading dan biarkan kosong
-      setIsLoading(false);
     }
-  }, [user?.id_gelombang]);
+  }, [student]);
 
   const onRefresh = () => {
     setRefreshing(true);
     fetchData();
   };
 
-  // Format tanggal helper
+  // Helper format tanggal
   const formatTanggal = (tanggal: string) => {
     if (!tanggal) return "-";
     const date = new Date(tanggal);
@@ -88,9 +122,103 @@ export default function JadwalTes() {
     return date.toLocaleDateString("id-ID", options);
   };
 
+  // --- LOGIC TAMPILAN (RENDER) ---
+
+  // 1. TAMPILAN LOADING
+  if (paymentStatus === "loading") {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#b91c1c" />
+        <Text style={{ marginTop: 10, color: "#666" }}>
+          Memeriksa status...
+        </Text>
+      </View>
+    );
+  }
+
+  // 2. TAMPILAN BELUM BAYAR (TERKUNCI)
+  if (paymentStatus === "unpaid") {
+    return (
+      <ScrollView
+        contentContainerStyle={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+          backgroundColor: "#fff",
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <Ionicons name="lock-closed" size={80} color="#d1d5db" />
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            marginTop: 16,
+            color: "#374151",
+          }}
+        >
+          Akses Terkunci
+        </Text>
+        <Text
+          style={{
+            textAlign: "center",
+            color: "#6b7280",
+            marginTop: 8,
+            marginBottom: 24,
+          }}
+        >
+          Anda belum melakukan pembayaran formulir. Silakan selesaikan
+          pembayaran di Dashboard untuk melihat jadwal tes.
+        </Text>
+        <AppButton
+          title="Ke Pembayaran"
+          onPress={() => router.push("/(main)")}
+        />
+      </ScrollView>
+    );
+  }
+
+  // 3. TAMPILAN MENUNGGU KONFIRMASI (PENDING)
+  if (paymentStatus === "pending") {
+    return (
+      <ScrollView
+        contentContainerStyle={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          padding: 24,
+          backgroundColor: "#fff",
+        }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <Ionicons name="time-outline" size={80} color="orange" />
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            marginTop: 16,
+            color: "#374151",
+          }}
+        >
+          Menunggu Verifikasi
+        </Text>
+        <Text style={{ textAlign: "center", color: "#6b7280", marginTop: 8 }}>
+          Bukti pembayaran Anda sedang diperiksa oleh Admin. Jadwal tes akan
+          muncul otomatis setelah pembayaran dikonfirmasi.
+        </Text>
+      </ScrollView>
+    );
+  }
+
+  // 4. TAMPILAN SUDAH BAYAR (CONFIRMED) -> TAMPILKAN JADWAL
   return (
     <View style={{ flex: 1, backgroundColor: "#f9fafb" }}>
-      {/* HEADER (Tetap Tampil Walaupun Error) */}
+      {/* HEADER */}
       <View
         style={{
           backgroundColor: "#b91c1c",
@@ -124,23 +252,8 @@ export default function JadwalTes() {
             Jadwal Tes PPDB
           </Text>
 
-          {/* KONDISI 1: LOADING */}
-          {isLoading ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: 50,
-              }}
-            >
-              <ActivityIndicator size="large" color="#b91c1c" />
-              <Text style={{ marginTop: 10, color: "#6b7280" }}>
-                Memuat jadwal...
-              </Text>
-            </View>
-          ) : jadwalTes ? (
-            /* KONDISI 2: DATA ADA */
+          {jadwalTes ? (
+            /* DATA JADWAL ADA */
             <View
               style={{
                 backgroundColor: "#fff",
@@ -169,6 +282,7 @@ export default function JadwalTes() {
                   marginVertical: 8,
                 }}
               />
+
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ fontSize: 16, fontWeight: "600" }}>
                   Wawancara
@@ -185,6 +299,7 @@ export default function JadwalTes() {
                   marginVertical: 8,
                 }}
               />
+
               <View style={{ marginBottom: 12 }}>
                 <Text style={{ fontSize: 16, fontWeight: "600" }}>
                   Psikotes
@@ -201,6 +316,7 @@ export default function JadwalTes() {
                   marginVertical: 8,
                 }}
               />
+
               <View>
                 <Text style={{ fontSize: 16, fontWeight: "600" }}>
                   Tes Komputer (TIK)
@@ -212,7 +328,7 @@ export default function JadwalTes() {
               </View>
             </View>
           ) : (
-            /* KONDISI 3: DATA KOSONG / ERROR (Tampilan Pemberitahuan) */
+            /* SUDAH BAYAR TAPI JADWAL BELUM DISET ADMIN */
             <View
               style={{
                 flex: 1,
@@ -246,8 +362,8 @@ export default function JadwalTes() {
                   textAlign: "center",
                 }}
               >
-                Silakan cek kembali secara berkala atau hubungi panitia PPDB
-                jika Anda merasa ini kesalahan.
+                Pembayaran Anda sudah dikonfirmasi, namun Panitia belum mengatur
+                jadwal tes untuk Gelombang Anda.
               </Text>
             </View>
           )}
