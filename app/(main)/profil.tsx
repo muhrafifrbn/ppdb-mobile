@@ -1,7 +1,14 @@
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import React from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useAuth } from "../../context/AuthContext";
 import { useStudentData } from "../../context/StudentContext";
 
@@ -21,11 +28,31 @@ export default function ProfilScreen() {
       {/* HEADER */}
       <View
         style={{
+          backgroundColor: "#b91c1c",
+          height: 120,
+          borderBottomLeftRadius: 90,
+          borderBottomRightRadius: 90,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Image
+            source={require("@/assets/images/logo-letris-removebg.png")}
+            style={{ width: 48, height: 48, marginRight: 10 }}
+            resizeMode="contain"
+          />
+          <Text style={{ color: "#fff", fontWeight: "700" }}>
+            SISTEM PPDB SMK LETRIS 2
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
           padding: 24,
-          paddingTop: 60,
         }}
       >
         <Text style={{ fontSize: 28, fontWeight: "bold", color: "#1f2937" }}>

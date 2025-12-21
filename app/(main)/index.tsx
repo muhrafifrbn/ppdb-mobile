@@ -1,11 +1,20 @@
 // app/(main)/index.tsx
 import Loading from "@/components/Loading";
-import React, { useState } from "react";
-import { Alert, Image, Modal, Pressable, RefreshControl, ScrollView, Text, View } from "react-native";
+import apiClient from "@/lib/api";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
+import React, { useState } from "react";
+import {
+  Alert,
+  Image,
+  Modal,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import AppButton from "../../components/ui/AppButton";
-import apiClient from "@/lib/api";
 import { useStudentData } from "../../context/StudentContext"; // 1. Import Context
 
 export default function Dashboard() {
@@ -18,16 +27,27 @@ export default function Dashboard() {
   const BANKS = [
     { value: "BCA", label: "BCA", norek: "1234567890 a.n. SMK Letris 2" },
     { value: "BRI", label: "BRI", norek: "0987654321 a.n. SMK Letris 2" },
-    { value: "Mandiri", label: "Mandiri", norek: "1112223334 a.n. SMK Letris 2" },
+    {
+      value: "Mandiri",
+      label: "Mandiri",
+      norek: "1112223334 a.n. SMK Letris 2",
+    },
     { value: "BNI", label: "BNI", norek: "5556667778 a.n. SMK Letris 2" },
   ];
   const formatIDR = (n: number) =>
-    new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", minimumFractionDigits: 0 }).format(n || 0);
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(n || 0);
 
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== "granted") {
-      Alert.alert("Izin diperlukan", "Aktifkan izin akses galeri untuk unggah bukti.");
+      Alert.alert(
+        "Izin diperlukan",
+        "Aktifkan izin akses galeri untuk unggah bukti."
+      );
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
@@ -40,13 +60,21 @@ export default function Dashboard() {
 
   const handleSubmitPayment = async () => {
     if (!bank || !buktiUri) {
-      Alert.alert("Validasi", "Pilih bank dan unggah bukti pembayaran terlebih dahulu.");
+      Alert.alert(
+        "Validasi",
+        "Pilih bank dan unggah bukti pembayaran terlebih dahulu."
+      );
       return;
     }
     try {
       setUploading(true);
-      const amount = Number((student as any)?.nominal_pembayaran ?? (student as any)?.total_biaya ?? 0);
-      const idFormulir = (student as any)?.id ?? (student as any)?.id_formulir ?? "";
+      const amount = Number(
+        (student as any)?.nominal_pembayaran ??
+          (student as any)?.total_biaya ??
+          150000
+      );
+      const idFormulir =
+        (student as any)?.id ?? (student as any)?.id_formulir ?? "";
       const today = new Date().toISOString().split("T")[0];
       const name = buktiUri.split("/").pop() || `bukti-${Date.now()}.jpg`;
       const form = new FormData();
@@ -55,8 +83,14 @@ export default function Dashboard() {
       form.append("tanggal_transfer", today);
       form.append("jumlah_tagihan", String(amount));
       form.append("id_formulir", String(idFormulir));
-      form.append("bukti_bayar", { uri: buktiUri, name, type: "image/jpeg" } as any);
-      await apiClient.post("/payment-form/mobile/create", form, { headers: { "Content-Type": "multipart/form-data" } });
+      form.append("bukti_bayar", {
+        uri: buktiUri,
+        name,
+        type: "image/jpeg",
+      } as any);
+      await apiClient.post("/payment-form/mobile/create", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       Alert.alert("Berhasil", "Bukti pembayaran terkirim.");
       setShowPaymentModal(false);
       setBank("");
@@ -161,23 +195,65 @@ export default function Dashboard() {
 
           <Text style={{ color: "#6b7280" }}>Nominal Tagihan</Text>
           <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 12 }}>
-            {formatIDR(Number((student as any)?.nominal_pembayaran ?? (student as any)?.total_biaya ?? 0))}
+            {formatIDR(
+              Number(
+                (student as any)?.nominal_pembayaran ??
+                  (student as any)?.total_biaya ??
+                  150000
+              )
+            )}
           </Text>
 
-          <AppButton title="Bayar Sekarang" onPress={() => setShowPaymentModal(true)} />
+          <AppButton
+            title="Bayar Sekarang"
+            onPress={() => setShowPaymentModal(true)}
+          />
         </View>
 
-        <Modal visible={showPaymentModal} transparent animationType="slide" onRequestClose={() => setShowPaymentModal(false)}>
-          <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.3)", justifyContent: "center", padding: 24 }}>
-            <View style={{ backgroundColor: "#fff", borderRadius: 12, padding: 16 }}>
-              <Text style={{ fontSize: 18, fontWeight: "700", marginBottom: 12 }}>Pembayaran</Text>
+        <Modal
+          visible={showPaymentModal}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setShowPaymentModal(false)}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.3)",
+              justifyContent: "center",
+              padding: 24,
+            }}
+          >
+            <View
+              style={{ backgroundColor: "#fff", borderRadius: 12, padding: 16 }}
+            >
+              <Text
+                style={{ fontSize: 18, fontWeight: "700", marginBottom: 12 }}
+              >
+                Pembayaran
+              </Text>
 
               <Text style={{ color: "#6b7280" }}>Pilih Bank</Text>
-              <View style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 8, marginBottom: 12, overflow: "hidden" }}>
-                <Picker selectedValue={bank} onValueChange={(v) => setBank(String(v))}>
+              <View
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#d1d5db",
+                  borderRadius: 8,
+                  marginBottom: 12,
+                  overflow: "hidden",
+                }}
+              >
+                <Picker
+                  selectedValue={bank}
+                  onValueChange={(v) => setBank(String(v))}
+                >
                   <Picker.Item label="Pilih Bank" value="" />
                   {BANKS.map((b) => (
-                    <Picker.Item key={b.value} label={b.label} value={b.value} />
+                    <Picker.Item
+                      key={b.value}
+                      label={b.label}
+                      value={b.value}
+                    />
                   ))}
                 </Picker>
               </View>
@@ -191,22 +267,43 @@ export default function Dashboard() {
                 </View>
               ) : null}
 
-              <Text style={{ color: "#6b7280", marginBottom: 8 }}>Upload Bukti Pembayaran</Text>
-              <Pressable onPress={pickImage} style={{ borderWidth: 1, borderColor: "#d1d5db", borderRadius: 8, padding: 12, alignItems: "center" }}>
+              <Text style={{ color: "#6b7280", marginBottom: 8 }}>
+                Upload Bukti Pembayaran
+              </Text>
+              <Pressable
+                onPress={pickImage}
+                style={{
+                  borderWidth: 1,
+                  borderColor: "#d1d5db",
+                  borderRadius: 8,
+                  padding: 12,
+                  alignItems: "center",
+                }}
+              >
                 <Text>{buktiUri ? "Ganti Bukti" : "Pilih Gambar"}</Text>
               </Pressable>
               {buktiUri ? (
                 <View style={{ marginTop: 12, alignItems: "center" }}>
-                  <Image source={{ uri: buktiUri }} style={{ width: 160, height: 160, borderRadius: 8 }} />
+                  <Image
+                    source={{ uri: buktiUri }}
+                    style={{ width: 160, height: 160, borderRadius: 8 }}
+                  />
                 </View>
               ) : null}
 
               <View style={{ flexDirection: "row", marginTop: 16, gap: 12 }}>
                 <View style={{ flex: 1 }}>
-                  <AppButton title="Kirim" onPress={handleSubmitPayment} loading={uploading} />
+                  <AppButton
+                    title="Kirim"
+                    onPress={handleSubmitPayment}
+                    loading={uploading}
+                  />
                 </View>
                 <View style={{ flex: 1 }}>
-                  <AppButton title="Tutup" onPress={() => setShowPaymentModal(false)} />
+                  <AppButton
+                    title="Tutup"
+                    onPress={() => setShowPaymentModal(false)}
+                  />
                 </View>
               </View>
             </View>
