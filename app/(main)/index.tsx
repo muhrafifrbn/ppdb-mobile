@@ -38,6 +38,7 @@ export default function Dashboard() {
       (student as any)?.status_konfirmasi === "CONFIRMED" ||
       (student as any)?.pembayaran_dikonfirmasi === true
   );
+  const currentStep = !isPaid ? 1 : !isConfirmed ? 2 : 3;
 
   useEffect(() => {
     refreshStudent();
@@ -229,94 +230,18 @@ export default function Dashboard() {
             />
           ) : null}
 
-          <View style={{ marginTop: 12 }}>
+          <View style={{ marginTop: 12, paddingHorizontal: 8 }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  backgroundColor: isConfirmed ? "#10b981" : "#fff",
-                  borderWidth: 2,
-                  borderColor: isConfirmed
-                    ? "#10b981"
-                    : isPaid
-                    ? "#b91c1c"
-                    : "#d1d5db",
-                }}
-              />
-              <View
-                style={{
-                  flex: 1,
-                  height: 2,
-                  backgroundColor: isConfirmed ? "#10b981" : "#d1d5db",
-                  marginHorizontal: 8,
-                }}
-              />
-              <View
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  backgroundColor: isConfirmed ? "#10b981" : "#fff",
-                  borderWidth: 2,
-                  borderColor: isConfirmed ? "#10b981" : "#d1d5db",
-                }}
-              />
-              <View
-                style={{
-                  flex: 1,
-                  height: 2,
-                  backgroundColor: isConfirmed ? "#10b981" : "#d1d5db",
-                  marginHorizontal: 8,
-                }}
-              />
-              <View
-                style={{
-                  width: 20,
-                  height: 20,
-                  borderRadius: 10,
-                  backgroundColor: "#fff",
-                  borderWidth: 2,
-                  borderColor: isConfirmed ? "#b91c1c" : "#d1d5db",
-                }}
-              />
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: currentStep === 1 ? "#b91c1c" : currentStep > 1 ? "#10b981" : "#fff", borderWidth: 2, borderColor: currentStep === 1 ? "#b91c1c" : currentStep > 1 ? "#10b981" : "#d1d5db" }} />
+              <View style={{ flex: 1, height: 2, backgroundColor: currentStep === 2 ? "#f59e0b" : currentStep > 2 ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: currentStep === 2 ? "#f59e0b" : currentStep > 2 ? "#10b981" : "#fff", borderWidth: 2, borderColor: currentStep === 2 ? "#f59e0b" : currentStep > 2 ? "#10b981" : "#d1d5db" }} />
+              <View style={{ flex: 1, height: 2, backgroundColor: currentStep > 2 ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: currentStep === 3 ? "#10b981" : "#fff", borderWidth: 2, borderColor: currentStep === 3 ? "#10b981" : "#d1d5db" }} />
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginTop: 8,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: isConfirmed
-                    ? "#10b981"
-                    : isPaid
-                    ? "#b91c1c"
-                    : "#6b7280",
-                }}
-              >
-                Bayar
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: isConfirmed ? "#10b981" : "#6b7280",
-                }}
-              >
-                Tunggu Konfirmasi
-              </Text>
-              <Text
-                style={{
-                  fontSize: 12,
-                  color: isConfirmed ? "#b91c1c" : "#6b7280",
-                }}
-              >
-                Cek Jadwal Tes
-              </Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8, paddingHorizontal: 4 }}>
+              <Text style={{ fontSize: 12, textAlign: "center", color: currentStep === 1 ? "#b91c1c" : currentStep > 1 ? "#10b981" : "#6b7280" }}>Bayar</Text>
+              <Text style={{ fontSize: 12, textAlign: "center", color: currentStep === 2 ? "#f59e0b" : currentStep > 2 ? "#10b981" : "#6b7280" }}>Tunggu Konfirmasi</Text>
+              <Text style={{ fontSize: 12, textAlign: "center", color: currentStep === 3 ? "#10b981" : "#6b7280" }}>Cek Jadwal Tes</Text>
             </View>
           </View>
         </View>
