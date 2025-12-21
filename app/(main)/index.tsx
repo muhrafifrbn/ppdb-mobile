@@ -1,5 +1,5 @@
 import Loading from "@/components/Loading";
-import { postMultipart } from "@/lib/api";
+import apiClient, { postMultipart } from "@/lib/api";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
@@ -26,28 +26,38 @@ export default function Dashboard() {
   const [paidLocal, setPaidLocal] = useState(false);
 
   // 1. LOGIKA STATUS PEMBAYARAN & KONFIRMASI
-  const isPaid =
-    paidLocal ||
-    Boolean(
-      (student as any)?.status_pembayaran === "PAID" ||
-        (student as any)?.sudah_bayar === true ||
-        (student as any)?.pembayaran_status === "PAID" ||
-        (student as any)?.tanggal_transfer
-    );
-
-  const isConfirmed = Boolean(
-    (student as any)?.konfirmasi_pembayaran === true ||
-      (student as any)?.status_konfirmasi === "CONFIRMED" ||
-      (student as any)?.status_konfirmasi === "VERIFIED" ||
-      (student as any)?.pembayaran_dikonfirmasi === true
-  );
-
-  // Menentukan step aktif: 1 (Bayar), 2 (Tunggu Konfirmasi), 3 (Selesai/Jadwal Tes)
+  const [paymentStatus, setPaymentStatus] = useState<"unpaid" | "pending" | "confirmed" | "loading">("loading");
+  const isPaid = paymentStatus !== "unpaid" || paidLocal;
+  const isConfirmed = paymentStatus === "confirmed";
   const currentStep = !isPaid ? 1 : !isConfirmed ? 2 : 3;
 
   useEffect(() => {
     refreshStudent();
   }, []);
+
+  const fetchPaymentStatus = async () => {
+    if (!student?.id) {
+      setPaymentStatus("loading");
+      return;
+    }
+    try {
+      const res = await apiClient.get(`/payment-form/mobile/detail/${student.id}`);
+      const pay = res.data?.data || res.data;
+      if (pay?.konfirmasi_pembayaran === 1 || pay?.status_konfirmasi === "CONFIRMED" || pay?.status_konfirmasi === "VERIFIED") {
+        setPaymentStatus("confirmed");
+      } else {
+        setPaymentStatus("pending");
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 404) setPaymentStatus("unpaid");
+      else setPaymentStatus("unpaid");
+    }
+  };
+
+  useEffect(() => {
+    setPaidLocal(false);
+    if (student?.id) fetchPaymentStatus();
+  }, [student?.id]);
 
   const BANKS = [
     { value: "BCA", label: "BCA", norek: "1234567890 a.n. SMK Letris 2" },
@@ -122,6 +132,7 @@ export default function Dashboard() {
 
       Alert.alert("Berhasil", "Bukti pembayaran terkirim.");
       setPaidLocal(true);
+      setPaymentStatus("pending");
       setShowPaymentModal(false);
       setBank("");
       setBuktiUri("");
@@ -215,11 +226,8 @@ export default function Dashboard() {
             {formatIDR(Number((student as any)?.nominal_pembayaran ?? 150000))}
           </Text>
 
-          {!isPaid && (
-            <AppButton
-              title="Bayar Sekarang"
-              onPress={() => setShowPaymentModal(true)}
-            />
+          {paymentStatus === "unpaid" && (
+            <AppButton title="Bayar Sekarang" onPress={() => setShowPaymentModal(true)} />
           )}
 
           {/* PROGRESS TRACKER */}
