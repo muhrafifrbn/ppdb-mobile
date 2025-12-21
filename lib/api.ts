@@ -10,6 +10,7 @@ import * as SecureStore from "expo-secure-store";
 // GANTI IP sesuai laptop/server kamu
 const BASE_URL =
   process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
+const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE
@@ -67,16 +68,39 @@ apiClient.interceptors.response.use(
   }
 );
 
+export const postMultipart = async (endpoint: string, formData: FormData) => {
+  try {
+    const token = await SecureStore.getItemAsync("auth_token");
+
+    // Gunakan axios langsung agar bisa override headers content-type
+    const response = await axios.post(
+      `${process.env.EXPO_PUBLIC_API_URL}${endpoint}`,
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Multipart API Error:", error);
+    throw error;
+  }
+};
+
 // ================================
 // WRAPPER GET / POST / PUT / DELETE
 // ================================
+
 export const get = async (endpoint: string, params = {}) => {
   try {
     const response = await apiClient.get(endpoint, { params });
+    // console.log("Response dari API:", response); // Log response dari API
     return response.data;
   } catch (error) {
-    console.error("GET Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -85,8 +109,7 @@ export const post = async (endpoint: string, data = {}) => {
     const response = await apiClient.post(endpoint, data);
     return response.data;
   } catch (error) {
-    console.error("POST Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -95,8 +118,7 @@ export const put = async (endpoint: string, data = {}) => {
     const response = await apiClient.put(endpoint, data);
     return response.data;
   } catch (error) {
-    console.error("PUT Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -105,8 +127,7 @@ export const del = async (endpoint: string) => {
     const response = await apiClient.delete(endpoint);
     return response.data;
   } catch (error) {
-    console.error("DELETE Error:", error);
-    throw error;
+    console.log("API Error:", error);
   }
 };
 
@@ -126,27 +147,12 @@ export interface RegistrationFormPayload {
   email: string;
   nama_ayah: string;
   nama_ibu: string;
-  id_gelombang: number;
 }
 
 export interface PPDBUser {
   id: number;
   nomor_formulir: string;
-  jurusan_dipilih: string;
-  nama_lengkap: string;
-  tempat_lahir: string;
-  tanggal_lahir: string;
-  jenis_kelamin: string;
-  agama: string;
-  sekolah_asal: string;
-  alamat: string;
-  telepon: string;
-  email: string;
-  nama_ayah: string;
-  nama_ibu: string;
-  id_gelombang: number;
-  created_at?: string;
-  updated_at?: string;
+  id_gelombang: string;
 }
 
 // ================================
@@ -176,19 +182,36 @@ export async function registerPPDB(
 // LOGIN: GET /api/regist-form/mobile/detail/:nomor_formulir
 // (verifyFormNumber akan detect nomor_formulir tsb)
 // ================================
-export async function loginPPDB(nomorFormulir: string): Promise<PPDBUser> {
-  console.log("LOGIN PPDB CALL", nomorFormulir);
+export async function loginPPDB(
+  nomor_formulir: string,
+  tanggal_lahir: string
+): Promise<any> {
+  console.log("LOGIN PPDB CALL", nomor_formulir);
 
   try {
-    const res = await apiClient.get("/regist-form/mobile/detail/0", {
-      headers: {
-        "x-form-number": nomorFormulir,
-      },
+    const res = await axios.post(BASE_URL_AUTH, {
+      nomor_formulir: nomor_formulir,
+      tanggal_lahir: tanggal_lahir,
     });
 
     console.log("LOGIN PPDB RESPONSE", res.data);
 
-    return res.data.data as PPDBUser;
+    const data = res.data;
+
+    if (!data || !data.token) {
+      throw new Error("Login failed, no token received.");
+    }
+
+    return {
+      accessToken: data.token,
+      refreshToken: data.refreshToken,
+      user: {
+        id: data.id,
+        nomor_formulir: data.nomor_formulir,
+        id_gelombang: data.id_gelombang,
+      },
+    };
+    // return res.data.data as PPDBUser;
   } catch (error: any) {
     console.log("LOGIN PPDB ERROR", {
       message: error.message,
