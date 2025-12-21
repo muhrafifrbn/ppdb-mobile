@@ -68,28 +68,24 @@ apiClient.interceptors.response.use(
   }
 );
 
-export const postMultipart = async (
-  endpoint: string,
-  formData: FormData
-) => {
+export const postMultipart = async (endpoint: string, formData: FormData) => {
   try {
     const response = await apiClient.post(endpoint, formData, {
+      transformRequest: (data) => data,
       headers: {
-        Accept: "application/json",
-        // JANGAN set Content-Type multipart manual
+        "Content-Type": "multipart/form-data",
       },
     });
     return response.data;
-  } catch (error) {
-    console.error("Multipart API Error:", {
-      message: (error as any)?.message,
-      status: (error as any)?.response?.status,
-      data: (error as any)?.response?.data,
-    });
+  } catch (error: any) {
+    // TAMBAHKAN LOG INI:
+    if (error.response) {
+      console.log("SERVER ERROR DATA:", error.response.data); // Ini akan memberitahu apa yang salah
+      console.log("SERVER STATUS:", error.response.status);
+    }
     throw error;
   }
 };
-
 
 // ================================
 // WRAPPER GET / POST / PUT / DELETE
