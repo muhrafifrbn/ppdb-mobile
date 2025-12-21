@@ -1,9 +1,9 @@
 // app/(main)/index.tsx
 import Loading from "@/components/Loading";
-import apiClient from "@/lib/api";
+import apiClient, { postMultipart } from "@/lib/api";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -24,6 +24,24 @@ export default function Dashboard() {
   const [buktiUri, setBuktiUri] = useState<string>("");
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [paidLocal, setPaidLocal] = useState(false);
+  const isPaid =
+    paidLocal ||
+    Boolean(
+      (student as any)?.status_pembayaran === "PAID" ||
+        (student as any)?.sudah_bayar === true ||
+        (student as any)?.pembayaran_status === "PAID" ||
+        (student as any)?.tanggal_transfer
+    );
+  const isConfirmed = Boolean(
+    (student as any)?.konfirmasi_pembayaran === true ||
+      (student as any)?.status_konfirmasi === "CONFIRMED" ||
+      (student as any)?.pembayaran_dikonfirmasi === true
+  );
+
+  useEffect(() => {
+    refreshStudent();
+  }, []);
   const BANKS = [
     { value: "BCA", label: "BCA", norek: "1234567890 a.n. SMK Letris 2" },
     { value: "BRI", label: "BRI", norek: "0987654321 a.n. SMK Letris 2" },
@@ -88,13 +106,13 @@ export default function Dashboard() {
         name,
         type: "image/jpeg",
       } as any);
-      await apiClient.post("/payment-form/mobile/create", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      await postMultipart("/payment-form/mobile/create", form);
       Alert.alert("Berhasil", "Bukti pembayaran terkirim.");
+      setPaidLocal(true);
       setShowPaymentModal(false);
       setBank("");
       setBuktiUri("");
+      refreshStudent();
     } catch (e: any) {
       Alert.alert("Gagal", e?.message ?? "Upload bukti gagal.");
     } finally {
@@ -204,10 +222,24 @@ export default function Dashboard() {
             )}
           </Text>
 
-          <AppButton
-            title="Bayar Sekarang"
-            onPress={() => setShowPaymentModal(true)}
-          />
+          {!isPaid ? (
+            <AppButton title="Bayar Sekarang" onPress={() => setShowPaymentModal(true)} />
+          ) : null}
+
+          <View style={{ marginTop: 12 }}>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: isConfirmed ? "#10b981" : "#fff", borderWidth: 2, borderColor: isConfirmed ? "#10b981" : (isPaid ? "#b91c1c" : "#d1d5db") }} />
+              <View style={{ flex: 1, height: 2, backgroundColor: isConfirmed ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: isConfirmed ? "#10b981" : "#fff", borderWidth: 2, borderColor: isConfirmed ? "#10b981" : "#d1d5db" }} />
+              <View style={{ flex: 1, height: 2, backgroundColor: isConfirmed ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
+              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", borderWidth: 2, borderColor: isConfirmed ? "#b91c1c" : "#d1d5db" }} />
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
+              <Text style={{ fontSize: 12, color: isConfirmed ? "#10b981" : (isPaid ? "#b91c1c" : "#6b7280") }}>Bayar</Text>
+              <Text style={{ fontSize: 12, color: isConfirmed ? "#10b981" : "#6b7280" }}>Tunggu Konfirmasi</Text>
+              <Text style={{ fontSize: 12, color: isConfirmed ? "#b91c1c" : "#6b7280" }}>Cek Jadwal Tes</Text>
+            </View>
+          </View>
         </View>
 
         <Modal
