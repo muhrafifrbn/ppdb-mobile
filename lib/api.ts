@@ -68,27 +68,28 @@ apiClient.interceptors.response.use(
   }
 );
 
-export const postMultipart = async (endpoint: string, formData: FormData) => {
+export const postMultipart = async (
+  endpoint: string,
+  formData: FormData
+) => {
   try {
-    const token = await SecureStore.getItemAsync("auth_token");
-
-    // Gunakan axios langsung agar bisa override headers content-type
-    const response = await axios.post(
-      `${process.env.EXPO_PUBLIC_API_URL}${endpoint}`,
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: token ? `Bearer ${token}` : "",
-        },
-      }
-    );
+    const response = await apiClient.post(endpoint, formData, {
+      headers: {
+        Accept: "application/json",
+        // JANGAN set Content-Type multipart manual
+      },
+    });
     return response.data;
   } catch (error) {
-    console.error("Multipart API Error:", error);
+    console.error("Multipart API Error:", {
+      message: (error as any)?.message,
+      status: (error as any)?.response?.status,
+      data: (error as any)?.response?.data,
+    });
     throw error;
   }
 };
+
 
 // ================================
 // WRAPPER GET / POST / PUT / DELETE
