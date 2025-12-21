@@ -39,15 +39,6 @@ export default function MainLayout() {
           }}
         />
         <Tabs.Screen
-          name="pengumuman"
-          options={{
-            title: "Pengumuman",
-            tabBarIcon: ({ color, size }) => (
-              <Ionicons name="megaphone-outline" size={size} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="profil"
           options={{
             title: "Profil",
