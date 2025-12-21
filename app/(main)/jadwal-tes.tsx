@@ -54,7 +54,7 @@ export default function JadwalTes() {
         if (payError.response && payError.response.status === 404) {
           setPaymentStatus("unpaid");
         } else {
-          console.error("Error cek pembayaran:", payError);
+          // console.error("Error cek pembayaran:", payError);
           // Default ke unpaid jika error lain agar aman
           setPaymentStatus("unpaid");
         }

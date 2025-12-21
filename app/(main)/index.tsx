@@ -1,6 +1,6 @@
 // app/(main)/index.tsx
 import Loading from "@/components/Loading";
-import apiClient, { postMultipart } from "@/lib/api";
+import { postMultipart } from "@/lib/api";
 import { Picker } from "@react-native-picker/picker";
 import * as ImagePicker from "expo-image-picker";
 import React, { useEffect, useState } from "react";
@@ -223,21 +223,100 @@ export default function Dashboard() {
           </Text>
 
           {!isPaid ? (
-            <AppButton title="Bayar Sekarang" onPress={() => setShowPaymentModal(true)} />
+            <AppButton
+              title="Bayar Sekarang"
+              onPress={() => setShowPaymentModal(true)}
+            />
           ) : null}
 
           <View style={{ marginTop: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: isConfirmed ? "#10b981" : "#fff", borderWidth: 2, borderColor: isConfirmed ? "#10b981" : (isPaid ? "#b91c1c" : "#d1d5db") }} />
-              <View style={{ flex: 1, height: 2, backgroundColor: isConfirmed ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
-              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: isConfirmed ? "#10b981" : "#fff", borderWidth: 2, borderColor: isConfirmed ? "#10b981" : "#d1d5db" }} />
-              <View style={{ flex: 1, height: 2, backgroundColor: isConfirmed ? "#10b981" : "#d1d5db", marginHorizontal: 8 }} />
-              <View style={{ width: 20, height: 20, borderRadius: 10, backgroundColor: "#fff", borderWidth: 2, borderColor: isConfirmed ? "#b91c1c" : "#d1d5db" }} />
+              <View
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: isConfirmed ? "#10b981" : "#fff",
+                  borderWidth: 2,
+                  borderColor: isConfirmed
+                    ? "#10b981"
+                    : isPaid
+                    ? "#b91c1c"
+                    : "#d1d5db",
+                }}
+              />
+              <View
+                style={{
+                  flex: 1,
+                  height: 2,
+                  backgroundColor: isConfirmed ? "#10b981" : "#d1d5db",
+                  marginHorizontal: 8,
+                }}
+              />
+              <View
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: isConfirmed ? "#10b981" : "#fff",
+                  borderWidth: 2,
+                  borderColor: isConfirmed ? "#10b981" : "#d1d5db",
+                }}
+              />
+              <View
+                style={{
+                  flex: 1,
+                  height: 2,
+                  backgroundColor: isConfirmed ? "#10b981" : "#d1d5db",
+                  marginHorizontal: 8,
+                }}
+              />
+              <View
+                style={{
+                  width: 20,
+                  height: 20,
+                  borderRadius: 10,
+                  backgroundColor: "#fff",
+                  borderWidth: 2,
+                  borderColor: isConfirmed ? "#b91c1c" : "#d1d5db",
+                }}
+              />
             </View>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 8 }}>
-              <Text style={{ fontSize: 12, color: isConfirmed ? "#10b981" : (isPaid ? "#b91c1c" : "#6b7280") }}>Bayar</Text>
-              <Text style={{ fontSize: 12, color: isConfirmed ? "#10b981" : "#6b7280" }}>Tunggu Konfirmasi</Text>
-              <Text style={{ fontSize: 12, color: isConfirmed ? "#b91c1c" : "#6b7280" }}>Cek Jadwal Tes</Text>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginTop: 8,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: isConfirmed
+                    ? "#10b981"
+                    : isPaid
+                    ? "#b91c1c"
+                    : "#6b7280",
+                }}
+              >
+                Bayar
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: isConfirmed ? "#10b981" : "#6b7280",
+                }}
+              >
+                Tunggu Konfirmasi
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: isConfirmed ? "#b91c1c" : "#6b7280",
+                }}
+              >
+                Cek Jadwal Tes
+              </Text>
             </View>
           </View>
         </View>
