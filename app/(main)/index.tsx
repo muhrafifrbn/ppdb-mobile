@@ -77,9 +77,9 @@ export default function Dashboard() {
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaType.IMAGE, // Fix warning deprecated
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      quality: 0.5,
+      quality: 0.8,
     });
     if (!res.canceled) setBuktiUri(res.assets[0].uri);
   };
