@@ -9,8 +9,8 @@ import * as SecureStore from "expo-secure-store";
 // Saran: pakai ENV, tapi sementara bisa hardcode
 // GANTI IP sesuai laptop/server kamu
 const BASE_URL =
-  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.1.6:5500/api";
-const BASE_URL_AUTH = "http://192.168.1.6:5500/api/auth-mobile/login";
+  process.env.EXPO_PUBLIC_API_URL ?? "http://192.168.100.9:5500/api";
+const BASE_URL_AUTH = "http://192.168.100.9:5500/api/auth-mobile/login";
 
 // ================================
 // AXIOS INSTANCE
@@ -165,8 +165,10 @@ export async function registerPPDB(
   //   data: { id: 123, nomor_formulir: "PPDB2024...." }
   // }
 
+  // console.log(res.data.nomor_formulir);
+
   if (!res?.data?.nomor_formulir) {
-    throw new Error("Nomor formulir tidak ditemukan pada response API");
+    throw new Error("Nomolir tidak ditemukan pada response API");
   }
 
   return {

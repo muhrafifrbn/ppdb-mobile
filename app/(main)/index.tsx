@@ -26,7 +26,9 @@ export default function Dashboard() {
   const [paidLocal, setPaidLocal] = useState(false);
 
   // 1. LOGIKA STATUS PEMBAYARAN & KONFIRMASI
-  const [paymentStatus, setPaymentStatus] = useState<"unpaid" | "pending" | "confirmed" | "loading">("loading");
+  const [paymentStatus, setPaymentStatus] = useState<
+    "unpaid" | "pending" | "confirmed" | "loading"
+  >("loading");
   const isPaid = paymentStatus !== "unpaid" || paidLocal;
   const isConfirmed = paymentStatus === "confirmed";
   const currentStep = !isPaid ? 1 : !isConfirmed ? 2 : 3;
@@ -41,9 +43,15 @@ export default function Dashboard() {
       return;
     }
     try {
-      const res = await apiClient.get(`/payment-form/mobile/detail/${student.id}`);
+      const res = await apiClient.get(
+        `/payment-form/mobile/detail/${student.id}`
+      );
       const pay = res.data?.data || res.data;
-      if (pay?.konfirmasi_pembayaran === 1 || pay?.status_konfirmasi === "CONFIRMED" || pay?.status_konfirmasi === "VERIFIED") {
+      if (
+        pay?.konfirmasi_pembayaran === 1 ||
+        pay?.status_konfirmasi === "CONFIRMED" ||
+        pay?.status_konfirmasi === "VERIFIED"
+      ) {
         setPaymentStatus("confirmed");
       } else {
         setPaymentStatus("pending");
@@ -223,11 +231,14 @@ export default function Dashboard() {
           </Text>
           <Text style={{ color: "#6b7280" }}>Tagihan Pendaftaran</Text>
           <Text style={{ fontSize: 16, fontWeight: "600", marginBottom: 12 }}>
-            {formatIDR(Number((student as any)?.nominal_pembayaran ?? 150000))}
+            {formatIDR(Number((student as any)?.nominal_pembayaran ?? 200000))}
           </Text>
 
           {paymentStatus === "unpaid" && (
-            <AppButton title="Bayar Sekarang" onPress={() => setShowPaymentModal(true)} />
+            <AppButton
+              title="Bayar Sekarang"
+              onPress={() => setShowPaymentModal(true)}
+            />
           )}
 
           {/* PROGRESS TRACKER */}

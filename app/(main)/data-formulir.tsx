@@ -16,19 +16,38 @@ import {
 } from "react-native";
 import { StudentForm, useStudentData } from "../../context/StudentContext";
 
+// Konfigurasi opsi sesuai Enum Database
+const JURUSAN_OPTIONS = [
+  "AKUNTANSI KEUANGAN LEMBAGA",
+  "BISNIS DARING PEMASARAN",
+  "DESAIN KOMUNIKASI VISUAL",
+  "MANAJEMEN PERKANTORAN DAN LAYANAN BISNIS",
+  "PENGEMBANGAN PERANGKAT LUNAK DAN GIM",
+  "TEKNIK JARINGAN KOMPUTER DAN TELEKOMUNIKASI",
+];
+
+const AGAMA_OPTIONS = [
+  "ISLAM",
+  "KRISTEN PROTESTAN",
+  "KRISTEN KATOLIK",
+  "HINDU",
+  "BUDHA",
+  "KONG HU CHU",
+  "KEPERCAYAAN",
+  "LAINNYA",
+];
+
 export default function DataFormulirScreen() {
   const { student, updateStudent } = useStudentData();
 
   const [isEditing, setIsEditing] = useState(false);
   const [loadingSave, setLoadingSave] = useState(false);
-
-  // State untuk Date Picker
   const [showDatePicker, setShowDatePicker] = useState(false);
 
   // State Form Data
   const [formData, setFormData] = useState<Partial<StudentForm>>({});
 
-  // 1. FIX TANGGAL SAAT LOAD DATA (Hapus jam/menit ISO)
+  // Sinkronisasi data dari context ke state lokal
   useEffect(() => {
     if (student) {
       let cleanDate = student.tanggal_lahir;
@@ -42,12 +61,10 @@ export default function DataFormulirScreen() {
     }
   }, [student]);
 
-  // Handler Change Umum
   const handleChange = (key: keyof StudentForm, value: string) => {
     setFormData((prev) => ({ ...prev, [key]: value }));
   };
 
-  // Handler Date Picker
   const handleDateChange = (event: any, selectedDate?: Date) => {
     if (Platform.OS === "android") {
       setShowDatePicker(false);
@@ -59,65 +76,43 @@ export default function DataFormulirScreen() {
     handleChange("tanggal_lahir", iso);
   };
 
-  // ==========================================
-  // 2. LOGIKA VALIDASI LENGKAP
-  // ==========================================
+  // Validasi Form sebelum simpan
   const validateForm = (): boolean => {
-    // A. Daftar field yang Wajib Diisi
     const requiredFields: { key: keyof StudentForm; label: string }[] = [
+      { key: "jurusan_dipilih", label: "Jurusan" },
       { key: "nama_lengkap", label: "Nama Lengkap" },
       { key: "tempat_lahir", label: "Tempat Lahir" },
       { key: "tanggal_lahir", label: "Tanggal Lahir" },
       { key: "jenis_kelamin", label: "Jenis Kelamin" },
       { key: "agama", label: "Agama" },
-      { key: "alamat", label: "Alamat Domisili" },
-      { key: "email", label: "Email" },
+      { key: "alamat", label: "Alamat" },
       { key: "telepon", label: "No. Telepon" },
-      { key: "nama_ayah", label: "Nama Ayah" },
-      { key: "nama_ibu", label: "Nama Ibu" },
-      { key: "sekolah_asal", label: "Sekolah Asal" },
-      { key: "jurusan_dipilih", label: "Jurusan" },
     ];
 
-    // B. Loop cek kekosongan
     for (const field of requiredFields) {
       const value = formData[field.key];
-      // Cek jika undefined, null, atau string kosong setelah di-trim
       if (!value || (typeof value === "string" && value.trim() === "")) {
-        Alert.alert(
-          "Data Belum Lengkap",
-          `Mohon isi bagian "${field.label}" terlebih dahulu.`
-        );
-        return false; // Validasi gagal
+        Alert.alert("Validasi", `${field.label} wajib diisi.`);
+        return false;
       }
     }
 
-    // C. Validasi Format Email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (formData.email && !emailRegex.test(formData.email)) {
-      Alert.alert(
-        "Format Salah",
-        "Format email tidak valid. Harap periksa kembali."
-      );
-      return false; // Validasi gagal
+      Alert.alert("Format Salah", "Email tidak valid.");
+      return false;
     }
 
-    return true; // Semua lolos
+    return true;
   };
 
-  // ==========================================
-  // 3. SIMPAN DATA
-  // ==========================================
   const handleSave = async () => {
-    // Jalankan validasi sebelum simpan
-    if (!validateForm()) {
-      return; // Stop jika validasi gagal
-    }
+    if (!validateForm()) return;
 
     setLoadingSave(true);
     try {
       await updateStudent(formData);
-      Alert.alert("Sukses", "Data berhasil diperbarui!");
+      Alert.alert("Sukses", "Data formulir berhasil diperbarui!");
       setIsEditing(false);
     } catch (error) {
       Alert.alert("Gagal", "Terjadi kesalahan saat menyimpan data.");
@@ -142,10 +137,7 @@ export default function DataFormulirScreen() {
         </Text>
 
         <TouchableOpacity
-          onPress={() => {
-            if (isEditing) handleSave();
-            else setIsEditing(true);
-          }}
+          onPress={() => (isEditing ? handleSave() : setIsEditing(true))}
           disabled={loadingSave}
         >
           {loadingSave ? (
@@ -164,7 +156,25 @@ export default function DataFormulirScreen() {
       </View>
 
       <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 50 }}>
+        {/* === DATA AKADEMIK === */}
+        <Text style={styles.sectionTitle}>Pilihan Jurusan</Text>
+        <FormSelect
+          label="Jurusan"
+          selectedValue={formData.jurusan_dipilih}
+          editable={isEditing}
+          onValueChange={(val) => handleChange("jurusan_dipilih", val)}
+          options={JURUSAN_OPTIONS.map((j) => ({ label: j, value: j }))}
+        />
+
+        <FormField
+          label="Sekolah Asal"
+          value={formData.sekolah_asal}
+          editable={isEditing}
+          onChangeText={(text) => handleChange("sekolah_asal", text)}
+        />
+
         {/* === IDENTITAS DIRI === */}
+        <View style={{ height: 16 }} />
         <Text style={styles.sectionTitle}>Identitas Diri</Text>
 
         <FormField
@@ -174,7 +184,6 @@ export default function DataFormulirScreen() {
           onChangeText={(text) => handleChange("nama_lengkap", text)}
         />
 
-        {/* Row Tempat & Tanggal Lahir */}
         <View style={{ flexDirection: "row", gap: 12 }}>
           <View style={{ flex: 1 }}>
             <FormField
@@ -193,7 +202,7 @@ export default function DataFormulirScreen() {
                 onPress={() => setShowDatePicker(true)}
               >
                 <Text style={{ color: "#1f2937" }}>
-                  {formData.tanggal_lahir || "Pilih Tanggal"}
+                  {formData.tanggal_lahir || "YYYY-MM-DD"}
                 </Text>
               </TouchableOpacity>
             ) : (
@@ -212,8 +221,8 @@ export default function DataFormulirScreen() {
           editable={isEditing}
           onValueChange={(val) => handleChange("jenis_kelamin", val)}
           options={[
-            { label: "Laki-laki", value: "LAKI-LAKI" },
-            { label: "Perempuan", value: "PEREMPUAN" },
+            { label: "LAKI-LAKI", value: "LAKI-LAKI" },
+            { label: "PEREMPUAN", value: "PEREMPUAN" },
           ]}
         />
 
@@ -222,30 +231,19 @@ export default function DataFormulirScreen() {
           selectedValue={formData.agama}
           editable={isEditing}
           onValueChange={(val) => handleChange("agama", val)}
-          options={[
-            { label: "Islam", value: "ISLAM" },
-            { label: "Kristen Protestan", value: "KRISTEN PROTESTAN" },
-            { label: "Kristen Katolik", value: "KRISTEN KATOLIK" },
-            { label: "Hindu", value: "HINDU" },
-            { label: "Buddha", value: "BUDDHA" },
-            { label: "Konghucu", value: "KONGHUCU" },
-          ]}
+          options={AGAMA_OPTIONS.map((a) => ({ label: a, value: a }))}
         />
 
+        {/* === KONTAK & ALAMAT === */}
+        <View style={{ height: 16 }} />
+        <Text style={styles.sectionTitle}>Alamat & Kontak</Text>
+
         <FormField
-          label="Alamat Domisili"
+          label="Alamat Lengkap"
           value={formData.alamat}
           editable={isEditing}
           multiline
           onChangeText={(text) => handleChange("alamat", text)}
-        />
-
-        <FormField
-          label="Email"
-          value={formData.email}
-          editable={isEditing}
-          keyboardType="email-address"
-          onChangeText={(text) => handleChange("email", text)}
         />
 
         <FormField
@@ -256,8 +254,16 @@ export default function DataFormulirScreen() {
           onChangeText={(text) => handleChange("telepon", text)}
         />
 
+        <FormField
+          label="Email"
+          value={formData.email}
+          editable={isEditing}
+          keyboardType="email-address"
+          onChangeText={(text) => handleChange("email", text)}
+        />
+
         {/* === DATA ORANG TUA === */}
-        <View style={{ height: 24 }} />
+        <View style={{ height: 16 }} />
         <Text style={styles.sectionTitle}>Data Orang Tua</Text>
 
         <FormField
@@ -274,56 +280,10 @@ export default function DataFormulirScreen() {
           onChangeText={(text) => handleChange("nama_ibu", text)}
         />
 
-        {/* === DATA AKADEMIK === */}
-        <View style={{ height: 24 }} />
-        <Text style={styles.sectionTitle}>Data Akademik</Text>
-
-        <FormSelect
-          label="Jurusan Pilihan"
-          selectedValue={formData.jurusan_dipilih}
-          editable={isEditing}
-          onValueChange={(val) => handleChange("jurusan_dipilih", val)}
-          options={[
-            {
-              label: "AKUNTANSI KEUANGAN LEMBAGA",
-              value: "AKUNTANSI KEUANGAN LEMBAGA",
-            },
-            {
-              label: "BISNIS DARING PEMASARAN",
-              value: "BISNIS DARING PEMASARAN",
-            },
-            {
-              label: "OTOMATISASI TATA KELOLA PERKANTORAN",
-              value: "OTOMATISASI TATA KELOLA PERKANTORAN",
-            },
-            { label: "MULTIMEDIA", value: "MULTIMEDIA" },
-            {
-              label: "REKAYASA PERANGKAT LUNAK",
-              value: "REKAYASA PERANGKAT LUNAK",
-            },
-            {
-              label: "TEKNIK KOMPUTER DAN JARINGAN",
-              value: "TEKNIK KOMPUTER DAN JARINGAN",
-            },
-          ]}
-        />
-
-        <FormField
-          label="Sekolah Asal"
-          value={formData.sekolah_asal}
-          editable={isEditing}
-          onChangeText={(text) => handleChange("sekolah_asal", text)}
-        />
-
-        {/* READ ONLY: NOMOR FORMULIR */}
-        <View style={{ marginBottom: 16 }}>
-          <Text style={styles.label}>Nomor Pendaftaran (Tetap)</Text>
-          <View
-            style={[
-              styles.readOnlyBox,
-              { backgroundColor: "#f3f4f6", borderColor: "#e5e7eb" },
-            ]}
-          >
+        {/* NOMOR FORMULIR (HIDDEN EDIT) */}
+        <View style={{ marginTop: 20 }}>
+          <Text style={styles.label}>Nomor Formulir (Otomatis)</Text>
+          <View style={[styles.readOnlyBox, { backgroundColor: "#f3f4f6" }]}>
             <Text style={[styles.readOnlyText, { color: "#9ca3af" }]}>
               {formData.nomor_formulir || "-"}
             </Text>
@@ -331,7 +291,6 @@ export default function DataFormulirScreen() {
         </View>
       </ScrollView>
 
-      {/* COMPONENT: DATE PICKER MODAL */}
       {showDatePicker && (
         <DateTimePicker
           value={
@@ -349,15 +308,15 @@ export default function DataFormulirScreen() {
   );
 }
 
-// HELPER COMPONENTS
+// --- SUB-COMPONENTS ---
 
 const FormField = ({
   label,
   value,
   editable,
   onChangeText,
-  multiline = false,
-  keyboardType = "default",
+  multiline,
+  keyboardType,
 }: any) => (
   <View style={{ marginBottom: 16 }}>
     <Text style={styles.label}>{label}</Text>
@@ -371,8 +330,7 @@ const FormField = ({
         onChangeText={onChangeText}
         multiline={multiline}
         keyboardType={keyboardType}
-        placeholder={`Masukkan ${label}`}
-        placeholderTextColor="#9ca3af"
+        placeholder={`Isi ${label}`}
       />
     ) : (
       <View style={styles.readOnlyBox}>
@@ -388,43 +346,29 @@ const FormSelect = ({
   editable,
   onValueChange,
   options,
-}: {
-  label: string;
-  selectedValue: any;
-  editable: boolean;
-  onValueChange: (val: any) => void;
-  options: { label: string; value: string }[];
-}) => {
-  return (
-    <View style={{ marginBottom: 16 }}>
-      <Text style={styles.label}>{label}</Text>
-      {editable ? (
-        <View style={[styles.input, { padding: 0, justifyContent: "center" }]}>
-          <Picker
-            selectedValue={selectedValue}
-            onValueChange={onValueChange}
-            style={{ height: 50, width: "100%" }}
-            dropdownIconColor="#1f2937"
-          >
-            <Picker.Item label={`Pilih ${label}`} value="" color="#9ca3af" />
-            {options.map((opt, index) => (
-              <Picker.Item
-                key={index}
-                label={opt.label}
-                value={opt.value}
-                style={{ fontSize: 14 }}
-              />
-            ))}
-          </Picker>
-        </View>
-      ) : (
-        <View style={styles.readOnlyBox}>
-          <Text style={styles.readOnlyText}>{selectedValue || "-"}</Text>
-        </View>
-      )}
-    </View>
-  );
-};
+}: any) => (
+  <View style={{ marginBottom: 16 }}>
+    <Text style={styles.label}>{label}</Text>
+    {editable ? (
+      <View style={[styles.input, { padding: 0 }]}>
+        <Picker
+          selectedValue={selectedValue}
+          onValueChange={onValueChange}
+          style={{ height: 50 }}
+        >
+          <Picker.Item label={`Pilih ${label}`} value="" color="#9ca3af" />
+          {options.map((opt: any, i: number) => (
+            <Picker.Item key={i} label={opt.label} value={opt.value} />
+          ))}
+        </Picker>
+      </View>
+    ) : (
+      <View style={styles.readOnlyBox}>
+        <Text style={styles.readOnlyText}>{selectedValue || "-"}</Text>
+      </View>
+    )}
+  </View>
+);
 
 const styles = StyleSheet.create({
   header: {
@@ -442,34 +386,29 @@ const styles = StyleSheet.create({
   backButton: { padding: 4 },
   actionText: { fontSize: 16, fontWeight: "700" },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 12,
     color: "#b91c1c",
+    textTransform: "uppercase",
   },
-  label: {
-    fontSize: 14,
-    color: "#6b7280",
-    marginBottom: 6,
-    fontWeight: "500",
-  },
+  label: { fontSize: 13, color: "#6b7280", marginBottom: 6, fontWeight: "600" },
   input: {
     borderWidth: 1,
     borderColor: "#d1d5db",
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 12,
-    fontSize: 16,
+    fontSize: 15,
     color: "#1f2937",
-    backgroundColor: "#fff",
   },
   readOnlyBox: {
     padding: 12,
     backgroundColor: "#f9fafb",
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e5e7eb",
-    minHeight: 48,
+    minHeight: 45,
     justifyContent: "center",
   },
-  readOnlyText: { fontSize: 16, color: "#4b5563", fontWeight: "500" },
+  readOnlyText: { fontSize: 15, color: "#4b5563" },
 });

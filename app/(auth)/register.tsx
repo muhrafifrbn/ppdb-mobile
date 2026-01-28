@@ -150,7 +150,7 @@ export default function RegisterScreen() {
                 resizeMode="contain"
               />
               <Text style={{ color: "#fff", fontWeight: "700" }}>
-                FORSMK LETRIS 2
+                FORMULIR PPDB SMK LETRIS 2
               </Text>
             </View>
           </View>
