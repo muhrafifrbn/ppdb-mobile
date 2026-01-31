@@ -5,6 +5,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -38,8 +39,6 @@ const AGAMA_OPTIONS = [
   "KEPERCAYAAN",
   "LAINNYA",
 ];
-
-const DEFAULT_GELOMBANG_ID = 1; // sementara hardcode
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -105,7 +104,6 @@ export default function RegisterScreen() {
         email: form.email,
         nama_ayah: form.nama_ayah,
         nama_ibu: form.nama_ibu,
-        id_gelombang: DEFAULT_GELOMBANG_ID,
       };
 
       const result = await registerPPDB(payload);
@@ -132,9 +130,31 @@ export default function RegisterScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={{ fontSize: 22, fontWeight: "700", marginBottom: 16 }}>
-          Formulir Pendaftaran
-        </Text>
+        <View
+          style={{ marginHorizontal: -24, marginTop: -24, marginBottom: 16 }}
+        >
+          <View
+            style={{
+              backgroundColor: "#b91c1c",
+              height: 120,
+              borderBottomLeftRadius: 90,
+              borderBottomRightRadius: 90,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={require("../../assets/images/logo-letris-removebg.png")}
+                style={{ width: 48, height: 48, marginRight: 10 }}
+                resizeMode="contain"
+              />
+              <Text style={{ color: "#fff", fontWeight: "700" }}>
+                FORMULIR PPDB SMK LETRIS 2
+              </Text>
+            </View>
+          </View>
+        </View>
 
         {/* JURUSAN DIPILIH */}
         <Text>Jurusan Dipilih</Text>
