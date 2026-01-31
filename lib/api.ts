@@ -34,7 +34,7 @@ apiClient.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // ================================
@@ -65,7 +65,7 @@ apiClient.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export const postMultipart = async (endpoint: string, formData: FormData) => {
@@ -156,7 +156,7 @@ export interface PPDBUser {
 // REGISTER: POST /api/regist-form/mobile/create
 // ================================
 export async function registerPPDB(
-  payload: RegistrationFormPayload
+  payload: RegistrationFormPayload,
 ): Promise<{ id: number; nomor_formulir: string }> {
   const res = await post("/regist-form/mobile/create", payload);
   // Response dari backend:
@@ -183,7 +183,7 @@ export async function registerPPDB(
 // ================================
 export async function loginPPDB(
   nomor_formulir: string,
-  tanggal_lahir: string
+  tanggal_lahir: string,
 ): Promise<any> {
   console.log("LOGIN PPDB CALL", nomor_formulir);
 

@@ -44,7 +44,7 @@ export default function Dashboard() {
     }
     try {
       const res = await apiClient.get(
-        `/payment-form/mobile/detail/${student.id}`
+        `/payment-form/mobile/detail/${student.id}`,
       );
       const pay = res.data?.data || res.data;
       if (
@@ -90,7 +90,7 @@ export default function Dashboard() {
     if (perm.status !== "granted") {
       Alert.alert(
         "Izin diperlukan",
-        "Aktifkan izin akses galeri untuk unggah bukti."
+        "Aktifkan izin akses galeri untuk unggah bukti.",
       );
       return;
     }
@@ -106,21 +106,21 @@ export default function Dashboard() {
     if (!bank || !buktiUri) {
       Alert.alert(
         "Validasi",
-        "Pilih bank dan unggah bukti pembayaran terlebih dahulu."
+        "Pilih bank dan unggah bukti pembayaran terlebih dahulu.",
       );
       return;
     }
     try {
       setUploading(true);
-      const amount = Number((student as any)?.nominal_pembayaran ?? 150000);
+      const amount = Number((student as any)?.nominal_pembayaran ?? 200000);
       const idFormulir =
         (student as any)?.id ?? (student as any)?.id_formulir ?? "";
 
       const form = new FormData();
-      form.append("nama_tagihan", "Biaya Pendaftaran");
+      // form.append("nama_tagihan", "Biaya Pendaftaran");
       form.append("nama_bank", bank);
       form.append("tanggal_transfer", new Date().toISOString().split("T")[0]);
-      form.append("jumlah_tagihan", String(amount));
+      // form.append("jumlah_tagihan", String(amount));
       form.append("id_formulir", String(idFormulir));
 
       const filename = buktiUri.split("/").pop() || `bukti-${Date.now()}.jpg`;
@@ -135,6 +135,7 @@ export default function Dashboard() {
         name: filename,
         type: type,
       } as any);
+      console.log(form);
 
       await postMultipart("/payment-form/mobile/create", form);
 
@@ -283,8 +284,8 @@ export default function Dashboard() {
                     currentStep === 2
                       ? "#f59e0b"
                       : currentStep > 2
-                      ? "#10b981"
-                      : "#d1d5db",
+                        ? "#10b981"
+                        : "#d1d5db",
                   justifyContent: "center",
                   alignItems: "center",
                 }}
@@ -347,8 +348,8 @@ export default function Dashboard() {
                     currentStep === 2
                       ? "#f59e0b"
                       : currentStep > 2
-                      ? "#10b981"
-                      : "#6b7280",
+                        ? "#10b981"
+                        : "#6b7280",
                   fontWeight: currentStep === 2 ? "700" : "400",
                   width: 80,
                   textAlign: "center",

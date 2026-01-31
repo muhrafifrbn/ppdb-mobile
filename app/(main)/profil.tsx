@@ -132,7 +132,19 @@ export default function ProfilScreen() {
             icon="rocket-outline"
             label="Visi dan Misi"
             onPress={() =>
-              Alert.alert("Info", "Fitur Visi Misi akan segera hadir.")
+              Alert.alert(
+                "Visi dan Misi",
+                `Visi:
+Menghasilkan tamatan yang kompeten, mandiri, profesional, dan religius.
+
+Misi:
+1) Memantapkan karakter siswa menuju perilaku yang santun dan berkepribadian.
+2) Menyiapkan tenaga terampil yang memiliki etos kerja menuju insan yang mandiri.
+3) Meningkatkan kualitas sumber daya manusia (SDM) melalui pendidikan, latihan, dan pengembangan terpadu.
+4) Membangun jiwa wirausaha yang profesional dan berakhlak mulia.
+5) Meningkatkan kerja sama dengan lembaga dunia industri, baik dalam bentuk praktik kerja maupun penempatan tamatan.
+6) Mengembangkan dan mengoptimalkan sarana prasarana untuk membentuk kompetensi dasar yang kuat.`,
+              )
             }
             color="#6366f1" // Indigo
           />
